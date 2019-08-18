@@ -1,6 +1,6 @@
 import pytest
 
-from vertigo.test_runner.exceptions import TestRunException, TimedOut, DidNotCompile
+from eth_vertigo.test_runner.exceptions import TestRunException, TimedOut, DidNotCompile
 
 
 def test_exception():

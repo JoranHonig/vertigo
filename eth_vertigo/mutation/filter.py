@@ -1,5 +1,5 @@
 from typing import List
-from vertigo.mutation.mutation import Mutation
+from eth_vertigo.mutation.mutation import Mutation
 
 
 class MutationFilter:

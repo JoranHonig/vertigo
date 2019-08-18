@@ -1,4 +1,4 @@
-from vertigo.test_runner.truffle.truffle_tester import TruffleTester
+from eth_vertigo.test_runner.truffle.truffle_tester import TruffleTester
 import pytest
 
 

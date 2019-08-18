@@ -1,4 +1,4 @@
-from vertigo.test_runner.truffle.truffle_runner_factory import TruffleRunnerFactory, TruffleRunner
+from eth_vertigo.test_runner.truffle.truffle_runner_factory import TruffleRunnerFactory, TruffleRunner
 from unittest.mock import MagicMock
 
 

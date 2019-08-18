@@ -1,13 +1,13 @@
 import click
 from os import getcwd
 from pathlib import Path
-from vertigo.mutation import MutationResult
-from vertigo.mutation.truffle.truffle_campaign import TruffleCampaign
-from vertigo.mutation.filters.sample_filter import SampleFilter
-from vertigo.mutation.filters.exclude_filter import ExcludeFilter
-from vertigo.test_runner.truffle import TruffleRunnerFactory
-from vertigo.test_runner.exceptions import TestRunException
-from vertigo.interfaces.truffle import Truffle
+from eth_vertigo.mutation import MutationResult
+from eth_vertigo.mutation.truffle.truffle_campaign import TruffleCampaign
+from eth_vertigo.mutation.filters.sample_filter import SampleFilter
+from eth_vertigo.mutation.filters.exclude_filter import ExcludeFilter
+from eth_vertigo.test_runner.truffle import TruffleRunnerFactory
+from eth_vertigo.test_runner.exceptions import TestRunException
+from eth_vertigo.interfaces.truffle import Truffle
 
 from tqdm import tqdm
 

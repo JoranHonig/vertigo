@@ -1,4 +1,4 @@
-from vertigo.test_runner.runner import Runner
+from eth_vertigo.test_runner.runner import Runner
 import pytest
 
 # This test is only here for coverage

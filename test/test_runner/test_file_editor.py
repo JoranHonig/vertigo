@@ -1,5 +1,5 @@
 from pathlib import Path
-from vertigo.test_runner.file_editor import FileEditor
+from eth_vertigo.test_runner.file_editor import FileEditor
 import pytest
 
 CONTENT = u"aaaaa"

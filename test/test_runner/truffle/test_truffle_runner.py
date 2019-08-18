@@ -4,10 +4,10 @@ import pytest
 
 from unittest.mock import MagicMock
 
-from vertigo.mutation import Mutation
-from vertigo.source.source_file import SourceFile
-from vertigo.test_runner.truffle.truffle_tester import TruffleTester
-from vertigo.test_runner.truffle.truffle_runner import _make_temp_truffle_directory, _rm_temp_truffle_directory, \
+from eth_vertigo.mutation import Mutation
+from eth_vertigo.source.source_file import SourceFile
+from eth_vertigo.test_runner.truffle.truffle_tester import TruffleTester
+from eth_vertigo.test_runner.truffle.truffle_runner import _make_temp_truffle_directory, _rm_temp_truffle_directory, \
     _set_reporter, _apply_mutation, TruffleRunner
 
 

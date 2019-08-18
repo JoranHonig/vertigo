@@ -1,7 +1,7 @@
-from vertigo.test_runner import Runner
-from vertigo.test_runner.file_editor import FileEditor
-from vertigo.test_runner.truffle.truffle_tester import TruffleTester
-from vertigo.mutation import Mutation
+from eth_vertigo.test_runner import Runner
+from eth_vertigo.test_runner.file_editor import FileEditor
+from eth_vertigo.test_runner.truffle.truffle_tester import TruffleTester
+from eth_vertigo.mutation import Mutation
 from typing import Generator
 
 from pathlib import Path

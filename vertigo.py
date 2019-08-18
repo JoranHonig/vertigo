@@ -1,3 +1,3 @@
-from vertigo.cli.main import cli
+from eth_vertigo.cli.main import cli
 
 cli()

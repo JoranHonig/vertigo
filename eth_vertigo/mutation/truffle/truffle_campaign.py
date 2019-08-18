@@ -1,10 +1,10 @@
-from vertigo.source.truffle.solidity_file import SolidityFile
-from vertigo.source.solidity.solidity_mutator import SolidityMutator
-from vertigo.test_runner.truffle import TruffleRunnerFactory
-from vertigo.mutation import Mutation, MutationResult
-from vertigo.mutation.campaign import Campaign
-from vertigo.mutation.truffle.truffle_compiler import TruffleCompiler
-from vertigo.test_runner.exceptions import TestRunException, TimedOut
+from eth_vertigo.source.truffle.solidity_file import SolidityFile
+from eth_vertigo.source.solidity.solidity_mutator import SolidityMutator
+from eth_vertigo.test_runner.truffle import TruffleRunnerFactory
+from eth_vertigo.mutation import Mutation, MutationResult
+from eth_vertigo.mutation.campaign import Campaign
+from eth_vertigo.mutation.truffle.truffle_compiler import TruffleCompiler
+from eth_vertigo.test_runner.exceptions import TestRunException, TimedOut
 
 from typing import List, Callable
 from time import time

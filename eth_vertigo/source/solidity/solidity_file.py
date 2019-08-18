@@ -3,7 +3,7 @@ from subprocess import Popen, PIPE
 import re
 from json import loads, JSONDecodeError
 from pathlib import Path
-from vertigo.source.source_file import SourceFile
+from eth_vertigo.source.source_file import SourceFile
 
 
 def _get_ast(file: Path):

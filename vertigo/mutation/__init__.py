@@ -1,1 +1,0 @@
-from vertigo.mutation.mutation import Mutation, MutationResult

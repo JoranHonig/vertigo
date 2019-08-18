@@ -1,4 +1,4 @@
-from vertigo.source.source_file import SourceFile
+from eth_vertigo.source.source_file import SourceFile
 from pathlib import Path
 
 

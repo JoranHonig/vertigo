@@ -17,7 +17,7 @@ setup(
     description="Mutation Testing for Ethereum Smart Contracts",
     long_description=README,
     long_description_content_type="text/markdown",
-    url="https://github.com/joranhonig/vertigo",
+    url="https://github.com/joranhonig/eth_vertigo",
     author="Joran Honig",
     author_email="joran.honig@gmail.com",
     license="GPLv3",
@@ -30,7 +30,7 @@ setup(
     install_requires=requirements,
     entry_points={
         "console_scripts": [
-            "vertigo=vertigo.cli.main:cli",
+            "eth_vertigo=eth_vertigo.cli.main:cli",
         ]
     },
 )

@@ -1,8 +1,8 @@
-from vertigo.test_runner.truffle.truffle_tester import TruffleTester
-from vertigo.mutation.truffle.truffle_compiler import TruffleCompiler
+from eth_vertigo.test_runner.truffle.truffle_tester import TruffleTester
+from eth_vertigo.mutation.truffle.truffle_compiler import TruffleCompiler
 
-from vertigo.test_runner.exceptions import TestRunException, TimedOut
-from vertigo.test_runner import TestResult
+from eth_vertigo.test_runner.exceptions import TestRunException, TimedOut
+from eth_vertigo.test_runner import TestResult
 from json import loads, JSONDecodeError
 from subprocess import Popen, TimeoutExpired
 from tempfile import TemporaryFile

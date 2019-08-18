@@ -1,6 +1,6 @@
-from vertigo.source.solidity.solidity_file import SolidityFile
-from vertigo.source.source_mutator import Mutator
-from vertigo.mutation.mutation import Mutation
+from eth_vertigo.source.solidity.solidity_file import SolidityFile
+from eth_vertigo.source.source_mutator import Mutator
+from eth_vertigo.mutation.mutation import Mutation
 from pathlib import Path
 
 conditional_boundary_mutator = {

@@ -1,5 +1,5 @@
-from vertigo.test_runner.truffle.truffle_tester import TruffleTester
-from vertigo.test_runner.truffle.truffle_runner import TruffleRunner
+from eth_vertigo.test_runner.truffle.truffle_tester import TruffleTester
+from eth_vertigo.test_runner.truffle.truffle_runner import TruffleRunner
 
 
 class TruffleRunnerFactory:

@@ -1,10 +1,10 @@
-from vertigo.mutation.filter import MutationFilter
+from eth_vertigo.mutation.filter import MutationFilter
 import pytest
 
 
 def test_mutation_filter_interface():
     # Arrange
-    filter = MutationFilter
+    filter = MutationFilter()
 
     # Act
     with pytest.raises(NotImplementedError):

@@ -1,11 +1,11 @@
 from pathlib import Path
-from vertigo.source.source_file import SourceFile
+from eth_vertigo.source.source_file import SourceFile
 from typing import Tuple
 from enum import Enum
 from jinja2 import PackageLoader, Environment
 
 environment = Environment(
-        loader=PackageLoader("vertigo.mutation"), trim_blocks=True
+        loader=PackageLoader("eth_vertigo.mutation"), trim_blocks=True
     )
 
 class MutationResult(Enum):
@@ -34,7 +34,7 @@ class Mutation:
         :param location: Location of the mutation, in the src format (offset, length, file_index)
         :param source: Source file for which the mutation is to be applied
         :param value: New value that the location should take on
-        :param project_directory: Project directory Path of the project directory that vertigo is working in
+        :param project_directory: Project directory Path of the project directory that eth_vertigo is working in
         """
         self.location = location
         self.source = source

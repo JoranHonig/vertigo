@@ -1,12 +1,12 @@
 from typing import Callable, List
-from vertigo.mutation.filter import MutationFilter
+from eth_vertigo.mutation.filter import MutationFilter
 
-from vertigo.mutation import Mutation, MutationResult
+from eth_vertigo.mutation import Mutation, MutationResult
 from jinja2 import PackageLoader, Environment
 from concurrent.futures import ThreadPoolExecutor
 
 environment = Environment(
-        loader=PackageLoader("vertigo.mutation"), trim_blocks=True
+        loader=PackageLoader("eth_vertigo.mutation"), trim_blocks=True
     )
 
 

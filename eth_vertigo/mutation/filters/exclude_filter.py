@@ -1,6 +1,6 @@
 from typing import List
-from vertigo.mutation.mutation import Mutation
-from vertigo.mutation.filter import MutationFilter
+from eth_vertigo.mutation.mutation import Mutation
+from eth_vertigo.mutation.filter import MutationFilter
 from random import sample
 
 
