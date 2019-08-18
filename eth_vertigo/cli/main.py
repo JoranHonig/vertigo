@@ -13,7 +13,6 @@ from tqdm import tqdm
 
 
 @click.group(help="Mutation testing framework for smart contracts")
-@click.version_option(1)
 def cli():
     pass
 
