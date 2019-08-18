@@ -12,7 +12,7 @@ REQUIREMENTS = (HERE / "requirements.txt")
 requirements = [x for x in map(str.strip, REQUIREMENTS.read_text().split("\n")) if x != ""]
 
 setup(
-    name="vertigo",
+    name="eth-vertigo",
     version="1.0.0",
     description="Mutation Testing for Ethereum Smart Contracts",
     long_description=README,
