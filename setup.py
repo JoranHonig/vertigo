@@ -13,7 +13,7 @@ requirements = [x for x in map(str.strip, REQUIREMENTS.read_text().split("\n")) 
 
 setup(
     name="eth-vertigo",
-    version="1.0.9",
+    version="1.0.10",
     description="Mutation Testing for Ethereum Smart Contracts",
     long_description=README,
     long_description_content_type="text/markdown",
