@@ -18,6 +18,8 @@ def _make_temp_truffle_directory(original_dir: str):
 
 def _set_reporter(directory: str):
     config = Path(directory) / "truffle.js"
+    if not config.is_file():
+        config = Path(directory) / "truffle-config.js"
     content = config.read_text("utf-8")
     content += "\nmodule.exports.mocha = {reporter: \"json\"}\n"
     config.write_text(content, "utf-8")
