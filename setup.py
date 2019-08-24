@@ -25,7 +25,7 @@ setup(
         "Programming Language :: Python :: 3",
         "Programming Language :: Python :: 3.7",
     ],
-    packages=find_packages(),
+    packages=["eth_vertigo"],
     include_package_data=True,
     install_requires=requirements,
     entry_points={
