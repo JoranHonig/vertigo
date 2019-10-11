@@ -13,6 +13,7 @@ class MutationResult(Enum):
     LIVED = 2
     TIMEDOUT = 3
     ERROR = 4
+    EQUIVALENT = 5
 
 
 _mutationresult_string = {
@@ -20,8 +21,10 @@ _mutationresult_string = {
     MutationResult.LIVED: "Lived",
     MutationResult.TIMEDOUT: "Timeout",
     MutationResult.ERROR: "Error",
+    MutationResult.EQUIVALENT: "Equivalent",
     None: "None"
 }
+
 
 class Mutation:
     """

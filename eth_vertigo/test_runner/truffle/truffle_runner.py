@@ -1,7 +1,7 @@
 from eth_vertigo.test_runner import Runner
 from eth_vertigo.test_runner.file_editor import FileEditor
 from eth_vertigo.test_runner.truffle.truffle_tester import TruffleTester
-from eth_vertigo.mutation import Mutation
+from eth_vertigo.mutation import Mutation, MutationResult
 from typing import Generator
 
 from pathlib import Path
@@ -59,10 +59,10 @@ class TruffleRunner(Runner):
         if mutation:
             _apply_mutation(mutation, temp_dir)
         try:
-            if self.truffle_tester.check_bytecodes(temp_dir, original_bytecode):
-                # This is an equivalent mutant
-                pass
-            result = self.truffle_tester.run_test_command(temp_dir, timeout=timeout, network_name=network)
+            if original_bytecode and self.truffle_tester.check_bytecodes(temp_dir, original_bytecode):
+                result = MutationResult.EQUIVALENT
+            else:
+                result = self.truffle_tester.run_test_command(temp_dir, timeout=timeout, network_name=network)
         finally:
             _rm_temp_truffle_directory(temp_dir)
 
