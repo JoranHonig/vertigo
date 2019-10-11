@@ -8,3 +8,6 @@ class TimedOut(Exception):
 
 class DidNotCompile(Exception):
     pass
+
+class EquivalentMutant(Exception):
+    pass

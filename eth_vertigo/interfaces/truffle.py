@@ -6,9 +6,10 @@ from eth_vertigo.test_runner import TestResult
 from json import loads, JSONDecodeError
 from subprocess import Popen, TimeoutExpired
 from tempfile import TemporaryFile
-
+from pathlib import Path
 from typing import Dict, Union
-
+from loguru import logger
+import json
 
 class Truffle(TruffleTester, TruffleCompiler):
     """ Truffle interface object, deals with the ugly commandline details"""
@@ -85,6 +86,47 @@ class Truffle(TruffleTester, TruffleCompiler):
             return self._normalize_mocha(loads(test_result))
         except JSONDecodeError:
             raise TestRunException("Encountered error during test output analysis")
+
+    def check_bytecodes(self, working_directory: str, original_bytecode: Dict[str, str]) -> bool:
+        """ Returns whether any of the bytecodes differ from the original bytecodes
+
+        :param working_directory: The truffle directory for which we should check the bytecodes
+        :param original_bytecode: The original bytecodes {'contractName': '0x00'}
+        :return: Whether the bytecodes match up
+        """
+        current_bytecodes = self.get_bytecodes(working_directory)
+        for contractName, bytecode in current_bytecodes.items():
+            if original_bytecode[contractName] != bytecode:
+                return False
+        return True
+
+    def get_bytecodes(self, working_directory: str) -> Dict[str, str]:
+        """ Returns the bytecodes in the compilation result of the current directory
+
+        :param working_directory: The truffle directory for which we retreive the bytecodes
+        :return: bytecodes in the shape {'contractName': '0x00'}
+        """
+        w_dir = Path(working_directory)
+        if not (w_dir / "build").is_dir():
+            self.run_compile_command(working_directory)
+        if not (w_dir / "build").is_dir():
+            logger.error("Compilation did not create build directory")
+
+        contracts_dir = w_dir / "build" / "contracts"
+        if not contracts_dir.is_dir():
+            logger.error("No contracts directory found in build directory")
+
+        current_bytecode = {}
+
+        for contract in contracts_dir.iterdir():
+            try:
+                contract_compilation_result = json.loads(contract.read_text('utf-8'))
+            except json.JSONDecodeError:
+                logger.warning(f"Could not read compilation result for {contract.name}")
+                continue
+
+            current_bytecode[contract_compilation_result["contractName"]] = contract_compilation_result["bytecode"]
+        return current_bytecode
 
     @staticmethod
     def _normalize_mocha(mocha_json: dict) -> Dict[str, TestResult]:

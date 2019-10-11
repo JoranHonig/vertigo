@@ -15,3 +15,12 @@ class TruffleTester:
         :return: The test results
         """
         raise NotImplementedError
+
+    def check_bytecodes(self, working_directory:str, original_bytecode: Dict[str, str]) -> bool:
+        """ Returns whether any of the bytecodes differ from the original bytecodes
+
+        :param working_directory: The truffle directory for which we should check the bytecodes
+        :param original_bytecode: The original bytecodes {'contractName': '0x00'}
+        :return: Whether the bytecodes match up
+        """
+        raise NotImplementedError

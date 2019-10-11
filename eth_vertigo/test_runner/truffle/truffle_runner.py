@@ -1,14 +1,15 @@
 from eth_vertigo.test_runner import Runner
 from eth_vertigo.test_runner.file_editor import FileEditor
 from eth_vertigo.test_runner.truffle.truffle_tester import TruffleTester
-from eth_vertigo.mutation import Mutation
+from eth_vertigo.test_runner.exceptions import EquivalentMutant
+from eth_vertigo.mutation import Mutation, MutationResult
 from typing import Generator
 
 from pathlib import Path
 from tempfile import mkdtemp
 from distutils.dir_util import copy_tree
 import shutil
-
+from typing import Dict
 
 def _make_temp_truffle_directory(original_dir: str):
     td = mkdtemp()
@@ -44,7 +45,7 @@ class TruffleRunner(Runner):
     def tests(self) -> Generator[str, None, None]:
         raise NotImplementedError
 
-    def run_tests(self, coverage: bool = False, mutation: Mutation = None, timeout=None, network=None) -> dict:
+    def run_tests(self, coverage: bool = False, mutation: Mutation = None, timeout=None, network: str = None, original_bytecode: Dict[str, str] = None) -> dict:
         """
         Runs all the tests in the truffle project in a clean environment
         :param coverage: Whether to run the tests with coverage
@@ -58,9 +59,11 @@ class TruffleRunner(Runner):
         _set_reporter(temp_dir)
         if mutation:
             _apply_mutation(mutation, temp_dir)
-
         try:
-            result = self.truffle_tester.run_test_command(temp_dir, timeout=timeout, network_name=network)
+            if original_bytecode and self.truffle_tester.check_bytecodes(temp_dir, original_bytecode):
+                raise EquivalentMutant
+            else:
+                result = self.truffle_tester.run_test_command(temp_dir, timeout=timeout, network_name=network)
         finally:
             _rm_temp_truffle_directory(temp_dir)
 

@@ -1,6 +1,7 @@
 from eth_vertigo.source.truffle.solidity_file import SolidityFile
 from eth_vertigo.source.solidity.solidity_mutator import SolidityMutator
 from eth_vertigo.test_runner.truffle import TruffleRunnerFactory
+from eth_vertigo.test_runner.exceptions import EquivalentMutant
 from eth_vertigo.mutation import Mutation, MutationResult
 from eth_vertigo.mutation.campaign import Campaign
 from eth_vertigo.mutation.truffle.truffle_compiler import TruffleCompiler
@@ -29,6 +30,7 @@ class TruffleCampaign(Campaign):
         self.base_run_time = None
         self.networks = networks
         self.networks_queue = Queue(maxsize=len(networks))
+        self.bytecodes = {}
 
         self.truffle_runner_factory = truffle_runner_factory
 
@@ -85,9 +87,17 @@ class TruffleCampaign(Campaign):
         if self.networks:
             network = self.networks_queue.get()
         try:
-            test_result = tr.run_tests(mutation=mutation, timeout=int(self.base_run_time) * 2, network=network)
-            if any(map(lambda t: not t.success, test_result.values())):
-                mutation.result = MutationResult.KILLED
+            try:
+                test_result = tr.run_tests(
+                    mutation=mutation,
+                    timeout=int(self.base_run_time) * 2,
+                    network=network,
+                    original_bytecode=self.bytecodes
+                )
+                if any(map(lambda t: not t.success, test_result.values())):
+                    mutation.result = MutationResult.KILLED
+            except EquivalentMutant:
+                mutation.result = MutationResult.EQUIVALENT
         except TimedOut:
             mutation.result = MutationResult.TIMEDOUT
         except TestRunException as e:
@@ -99,3 +109,6 @@ class TruffleCampaign(Campaign):
             done_callback()
             return
 
+    def store_compilation_results(self):
+        """ Stores compilation results for trivial compiler equivalence"""
+        self.bytecodes = self.truffle_compiler.get_bytecodes(working_directory=str(self.project_directory))
