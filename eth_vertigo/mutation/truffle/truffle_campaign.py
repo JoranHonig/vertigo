@@ -86,7 +86,12 @@ class TruffleCampaign(Campaign):
         if self.networks:
             network = self.networks_queue.get()
         try:
-            test_result = tr.run_tests(mutation=mutation, timeout=int(self.base_run_time) * 2, network=network)
+            test_result = tr.run_tests(
+                mutation=mutation,
+                timeout=int(self.base_run_time) * 2,
+                network=network,
+                original_bytecode=self.bytecodes
+            )
             if any(map(lambda t: not t.success, test_result.values())):
                 mutation.result = MutationResult.KILLED
         except TimedOut:
