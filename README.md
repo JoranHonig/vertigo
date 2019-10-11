@@ -38,5 +38,20 @@ Options:
   --help                   Show this message and exit.
                                                        
 ```
-### Publications
-A paper to introduce Vertigo will be presented CBT'19
+### Publications and Articles
+[Practical Mutation Testing for Smart Contracts](https://link.springer.com/chapter/10.1007/978-3-030-31500-9_19) - Joran J. Honig, Maarten H. Everts, Marieke Huisman
+
+[Introduction into Mutation Testing](https://medium.com/swlh/introduction-into-mutation-testing-d6512dc702b0?source=friends_link&sk=2878e0c08b6301a125198a264e43edb4) - Joran Honig
+
+If you want to cite vertigo, please use the following:
+```
+@InProceedings{10.1007/978-3-030-31500-9_19,
+author="Honig, Joran J.
+and Everts, Maarten H.
+and Huisman, Marieke",
+title="Practical Mutation Testing for Smart Contracts",
+booktitle="Data Privacy Management, Cryptocurrencies and Blockchain Technology",
+year="2019",
+publisher="Springer International Publishing",
+pages="289--303",
+```
