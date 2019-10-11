@@ -29,6 +29,7 @@ class TruffleCampaign(Campaign):
         self.base_run_time = None
         self.networks = networks
         self.networks_queue = Queue(maxsize=len(networks))
+        self.bytecodes = {}
 
         self.truffle_runner_factory = truffle_runner_factory
 
@@ -99,3 +100,6 @@ class TruffleCampaign(Campaign):
             done_callback()
             return
 
+    def store_compilation_results(self):
+        """ Stores compilation results for trivial compiler equivalence"""
+        self.bytecodes = self.truffle_compiler.get_bytecodes(working_directory=str(self.project_directory))

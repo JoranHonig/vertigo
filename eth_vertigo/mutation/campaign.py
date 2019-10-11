@@ -79,3 +79,6 @@ class Campaign:
         """ Checks whether the current project is valid """
         raise NotImplementedError
 
+    def store_compilation_results(self):
+        """ Stores compilation results for trivial compiler equivalence"""
+        raise NotImplementedError

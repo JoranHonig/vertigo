@@ -74,6 +74,8 @@ def run(output, network, truffle_location, sample_ratio, exclude):
             click.echo("[-] We couldn't get valid results by running the truffle tests.\n Aborting")
             return
         click.echo("[+] The project is valid")
+        click.echo("[*] Storing compilation results")
+        campaign.store_compilation_results()
         click.echo("[*] Running analysis on {} mutants".format(len(campaign.mutations)))
         with tqdm(total=len(campaign.mutations), unit="mutant") as pbar:
             report = campaign.run(lambda: pbar.update(1) and pbar.refresh(), threads=max(len(network), 1))
