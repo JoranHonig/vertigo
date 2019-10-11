@@ -1,6 +1,7 @@
 from eth_vertigo.test_runner import Runner
 from eth_vertigo.test_runner.file_editor import FileEditor
 from eth_vertigo.test_runner.truffle.truffle_tester import TruffleTester
+from eth_vertigo.test_runner.exceptions import EquivalentMutant
 from eth_vertigo.mutation import Mutation, MutationResult
 from typing import Generator
 
@@ -60,7 +61,7 @@ class TruffleRunner(Runner):
             _apply_mutation(mutation, temp_dir)
         try:
             if original_bytecode and self.truffle_tester.check_bytecodes(temp_dir, original_bytecode):
-                result = MutationResult.EQUIVALENT
+                raise EquivalentMutant
             else:
                 result = self.truffle_tester.run_test_command(temp_dir, timeout=timeout, network_name=network)
         finally:
