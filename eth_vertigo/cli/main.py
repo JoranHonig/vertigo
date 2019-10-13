@@ -8,6 +8,7 @@ from eth_vertigo.core.filters.exclude_filter import ExcludeFilter
 from eth_vertigo.test_runner.truffle import TruffleRunnerFactory
 from eth_vertigo.test_runner.exceptions import TestRunException
 from eth_vertigo.interfaces.truffle import Truffle
+from eth_vertigo.mutator.universal_mutator import UniversalMutator
 
 from tqdm import tqdm
 
@@ -20,10 +21,11 @@ def cli():
 @cli.command(help="Performs a core test campaign")
 @click.option('--output', help="Output core test results to file", nargs=1, type=str)
 @click.option('--network', help="Network names that vertigo can use", multiple=True)
+@click.option('--rules', help="Universal Mutator style rules to use in mutation testing", multiple=True)
 @click.option('--truffle-location', help="Location of truffle cli", nargs=1, type=str, default="truffle")
 @click.option('--sample-ratio', help="If this option is set. Vertigo will apply the sample filter with the given ratio", nargs=1, type=float)
 @click.option('--exclude', help="Vertigo won't mutate files in these directories", multiple=True)
-def run(output, network, truffle_location, sample_ratio, exclude):
+def run(output, network, rules, truffle_location, sample_ratio, exclude):
     """ Run command """
     click.echo("[*] Starting core testing")
 
@@ -50,13 +52,21 @@ def run(output, network, truffle_location, sample_ratio, exclude):
         if sample_ratio:
             filters.append(SampleFilter(sample_ratio))
 
+        mutators = []
+        if rules:
+            um = UniversalMutator()
+            for rule_file in rules:
+                um.load_rule(Path(rule_file))
+            mutators.append(um)
+
         try:
             campaign = TruffleCampaign(
                 project_directory=project_path,
                 truffle_compiler=truffle,
+                mutators=mutators,
                 truffle_runner_factory=TruffleRunnerFactory(truffle),
                 networks=network,
-                filters=filters
+                filters=filters,
             )
         except:
             click.echo("[-] Encountered an error while setting up the core campaign")
@@ -73,6 +83,7 @@ def run(output, network, truffle_location, sample_ratio, exclude):
         if not campaign.valid():
             click.echo("[-] We couldn't get valid results by running the truffle tests.\n Aborting")
             return
+
         click.echo("[+] The project is valid")
         click.echo("[*] Storing compilation results")
         campaign.store_compilation_results()
