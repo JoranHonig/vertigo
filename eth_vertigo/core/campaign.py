@@ -1,12 +1,12 @@
 from typing import Callable, List
-from eth_vertigo.mutation.filter import MutationFilter
+from eth_vertigo.core.filter import MutationFilter
 
-from eth_vertigo.mutation import Mutation, MutationResult
+from eth_vertigo.core import Mutation, MutationResult
 from jinja2 import PackageLoader, Environment
 from concurrent.futures import ThreadPoolExecutor
 
 environment = Environment(
-        loader=PackageLoader("eth_vertigo.mutation"), trim_blocks=True
+        loader=PackageLoader("eth_vertigo.core"), trim_blocks=True
     )
 
 
@@ -45,7 +45,7 @@ class CampaignReport:
 
 class Campaign:
     """
-    A mutation campaign class orchestrates and manages a mutation testing run
+    A core campaign class orchestrates and manages a core testing run
     """
 
     def __init__(self, filters: List[MutationFilter] = None):
@@ -60,7 +60,7 @@ class Campaign:
         raise NotImplementedError
 
     def run(self, progress_callback: Callable, threads=1):
-        """ Starts a mutation testing campaign"""
+        """ Starts a core testing campaign"""
         if not self.is_set_up:
             raise ValueError("This campaign is not setup yet")
 
@@ -72,7 +72,7 @@ class Campaign:
         return report
 
     def test_mutation(self, mutation: Mutation, done_callback: Callable):
-        """ Run the test suite using a mutation and check for murders """
+        """ Run the test suite using a core and check for murders """
         raise NotImplementedError
 
     def valid(self):

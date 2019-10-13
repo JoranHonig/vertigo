@@ -6,7 +6,7 @@ class SourceFile:
     """ SourceFile objects represent contract files
 
     Specifically it stores information on the file it represents and it exposes functions that
-    allow other components to find specific interesting locations in the source file.
+    allow other components to find specific interesting locations in the mutator file.
     This is mostly used by the different Mutator implementations
     """
 

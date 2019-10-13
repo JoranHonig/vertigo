@@ -1,0 +1,1 @@
+from eth_vertigo.core.mutation import Mutation, MutationResult

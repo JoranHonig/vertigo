@@ -15,13 +15,13 @@ class MutationStrategy(Enum):
 class MutationConfiguration:
     """This class is used to convey information to the Mutator instances
 
-    Selecting mutation profiles:
+    Selecting core profiles:
     This configuration object lets you configure a Mutator instance to only execute specific mutations strategies
     and leave others
     """
 
     def __init__(self, enabled_strategies=None):
-        """ Initialize mutation configuration object
+        """ Initialize core configuration object
 
         :param enabled_strategies:
         """

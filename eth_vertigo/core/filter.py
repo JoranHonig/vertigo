@@ -1,9 +1,9 @@
 from typing import List
-from eth_vertigo.mutation.mutation import Mutation
+from eth_vertigo.core.mutation import Mutation
 
 
 class MutationFilter:
-    """ A mutation filter provides an interface to selectively filter test cases"""
+    """ A core filter provides an interface to selectively filter test cases"""
 
     def apply(self, mutations: List[Mutation]) -> List[Mutation]:
         """ Apply this filter to a list of mutations

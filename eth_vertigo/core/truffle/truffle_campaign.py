@@ -1,10 +1,10 @@
-from eth_vertigo.source.truffle.solidity_file import SolidityFile
-from eth_vertigo.source.solidity.solidity_mutator import SolidityMutator
+from eth_vertigo.mutator.truffle.solidity_file import SolidityFile
+from eth_vertigo.mutator.solidity.solidity_mutator import SolidityMutator
 from eth_vertigo.test_runner.truffle import TruffleRunnerFactory
 from eth_vertigo.test_runner.exceptions import EquivalentMutant
-from eth_vertigo.mutation import Mutation, MutationResult
-from eth_vertigo.mutation.campaign import Campaign
-from eth_vertigo.mutation.truffle.truffle_compiler import TruffleCompiler
+from eth_vertigo.core import Mutation, MutationResult
+from eth_vertigo.core.campaign import Campaign
+from eth_vertigo.core.truffle.truffle_compiler import TruffleCompiler
 from eth_vertigo.test_runner.exceptions import TestRunException, TimedOut
 
 from typing import List, Callable
@@ -38,7 +38,7 @@ class TruffleCampaign(Campaign):
             self.networks_queue.put(network)
 
     def _get_sources(self, dir=None):
-        """ Implements basic source file discovery """
+        """ Implements basic mutator file discovery """
         if not (self.project_directory / "build").exists():
             self.truffle_compiler.run_compile_command(str(self.project_directory))
 
@@ -80,7 +80,7 @@ class TruffleCampaign(Campaign):
         self.is_set_up = True
 
     def test_mutation(self, mutation: Mutation, done_callback: Callable):
-        """ Run the test suite using a mutation and check for murders """
+        """ Run the test suite using a core and check for murders """
         tr = self.truffle_runner_factory.create(str(self.project_directory))
         mutation.result = MutationResult.LIVED
         network = None

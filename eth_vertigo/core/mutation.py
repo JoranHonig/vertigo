@@ -1,11 +1,11 @@
 from pathlib import Path
-from eth_vertigo.source.source_file import SourceFile
+from eth_vertigo.mutator.source_file import SourceFile
 from typing import Tuple
 from enum import Enum
 from jinja2 import PackageLoader, Environment
 
 environment = Environment(
-        loader=PackageLoader("eth_vertigo.mutation"), trim_blocks=True
+        loader=PackageLoader("eth_vertigo.core"), trim_blocks=True
     )
 
 class MutationResult(Enum):
@@ -28,14 +28,14 @@ _mutationresult_string = {
 
 class Mutation:
     """
-    A mutation class contains specific information on a single mutation
+    A core class contains specific information on a single core
     """
 
     def __init__(self, location: Tuple[int, int, int], source: SourceFile, value: str, project_directory: Path):
         """
-        Initializes a mutation
-        :param location: Location of the mutation, in the src format (offset, length, file_index)
-        :param source: Source file for which the mutation is to be applied
+        Initializes a core
+        :param location: Location of the core, in the src format (offset, length, file_index)
+        :param source: Source file for which the core is to be applied
         :param value: New value that the location should take on
         :param project_directory: Project directory Path of the project directory that eth_vertigo is working in
         """
@@ -44,13 +44,13 @@ class Mutation:
         self.project_directory = project_directory
         self.value = value
 
-        # The following parameters are used to track how and when this mutation was killed
+        # The following parameters are used to track how and when this core was killed
         self.result = None
         self.crime_scenes = []
 
     @property
     def relative_path(self):
-        """ Gets the relative path of the source wrt the project directory """
+        """ Gets the relative path of the mutator wrt the project directory """
         r_path = self.source.file.relative_to(self.project_directory)
         return str(r_path)
 
@@ -63,7 +63,7 @@ class Mutation:
             cursor += len(line)
 
     def __repr__(self) -> str:
-        """ Prints information that can be used to triage a mutation """
+        """ Prints information that can be used to triage a core """
         template = environment.get_template("mutation_template.jinja2")
         source_content = self.source.file.read_text('utf-8')
         line_nr, og_line = self._get_mutated_line(self.location[0], source_content)

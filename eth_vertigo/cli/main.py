@@ -1,10 +1,10 @@
 import click
 from os import getcwd
 from pathlib import Path
-from eth_vertigo.mutation import MutationResult
-from eth_vertigo.mutation.truffle.truffle_campaign import TruffleCampaign
-from eth_vertigo.mutation.filters.sample_filter import SampleFilter
-from eth_vertigo.mutation.filters.exclude_filter import ExcludeFilter
+from eth_vertigo.core import MutationResult
+from eth_vertigo.core.truffle.truffle_campaign import TruffleCampaign
+from eth_vertigo.core.filters.sample_filter import SampleFilter
+from eth_vertigo.core.filters.exclude_filter import ExcludeFilter
 from eth_vertigo.test_runner.truffle import TruffleRunnerFactory
 from eth_vertigo.test_runner.exceptions import TestRunException
 from eth_vertigo.interfaces.truffle import Truffle
@@ -17,15 +17,15 @@ def cli():
     pass
 
 
-@cli.command(help="Performs a mutation test campaign")
-@click.option('--output', help="Output mutation test results to file", nargs=1, type=str)
+@cli.command(help="Performs a core test campaign")
+@click.option('--output', help="Output core test results to file", nargs=1, type=str)
 @click.option('--network', help="Network names that vertigo can use", multiple=True)
 @click.option('--truffle-location', help="Location of truffle cli", nargs=1, type=str, default="truffle")
 @click.option('--sample-ratio', help="If this option is set. Vertigo will apply the sample filter with the given ratio", nargs=1, type=float)
 @click.option('--exclude', help="Vertigo won't mutate files in these directories", multiple=True)
 def run(output, network, truffle_location, sample_ratio, exclude):
     """ Run command """
-    click.echo("[*] Starting mutation testing")
+    click.echo("[*] Starting core testing")
 
     # Setup global parameters
     truffle = Truffle(truffle_location)
@@ -59,7 +59,7 @@ def run(output, network, truffle_location, sample_ratio, exclude):
                 filters=filters
             )
         except:
-            click.echo("[-] Encountered an error while setting up the mutation campaign")
+            click.echo("[-] Encountered an error while setting up the core campaign")
             raise
     else:
         click.echo("[*] Could not find supported project directory in {}".format(working_directory))
@@ -86,7 +86,7 @@ def run(output, network, truffle_location, sample_ratio, exclude):
         click.echo(e)
         return
     except Exception as e:
-        click.echo("[-] Encountered an error while running the mutation campaign")
+        click.echo("[-] Encountered an error while running the core campaign")
         click.echo(e)
         raise
 
@@ -102,7 +102,7 @@ def run(output, network, truffle_location, sample_ratio, exclude):
     if output:
         output_path = Path(output)
         if not output_path.exists() or click.confirm("[*] There already exists something at {}. Overwrite ".format(str(output_path))):
-            click.echo("Result of mutation run can be found at: {}".format(output))
+            click.echo("Result of core run can be found at: {}".format(output))
             output_path.write_text(report.render(with_mutations=True), "utf-8")
     click.echo("[*] Done! ")
 

@@ -1,7 +1,7 @@
 from jsonpath_rw import parse
 from json import loads
 from pathlib import Path
-from eth_vertigo.source.source_file import SourceFile
+from eth_vertigo.mutator.source_file import SourceFile
 
 
 def _get_ast(json_file):

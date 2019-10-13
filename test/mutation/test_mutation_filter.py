@@ -1,4 +1,4 @@
-from eth_vertigo.mutation.filter import MutationFilter
+from eth_vertigo.core.filter import MutationFilter
 import pytest
 
 
