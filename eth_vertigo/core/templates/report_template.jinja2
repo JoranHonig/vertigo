@@ -1,0 +1,11 @@
+Mutation testing report:
+Number of mutations:    {{ nr_mutations }}
+Killed:                 {{ nr_killed }} / {{ nr_mutations }}
+
+Mutations:
+{% if mutations and with_mutations %}
+{% for mutation in mutations %}
+{{ mutation }}
+
+{% endfor %}
+{% endif %}
