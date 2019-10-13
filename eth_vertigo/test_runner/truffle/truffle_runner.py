@@ -2,7 +2,7 @@ from eth_vertigo.test_runner import Runner
 from eth_vertigo.test_runner.file_editor import FileEditor
 from eth_vertigo.test_runner.truffle.truffle_tester import TruffleTester
 from eth_vertigo.test_runner.exceptions import EquivalentMutant
-from eth_vertigo.mutation import Mutation, MutationResult
+from eth_vertigo.core import Mutation, MutationResult
 from typing import Generator
 
 from pathlib import Path
@@ -22,7 +22,8 @@ def _set_reporter(directory: str):
     if not config.is_file():
         config = Path(directory) / "truffle-config.js"
     content = config.read_text("utf-8")
-    content += "\nmodule.exports.mocha = {reporter: \"json\"}\n"
+    content += "\nmodule.exports.mocha = {reporter: \"json\"};\n"
+    content += "\nmodule.exports.solc = {optimizer: { enabled: true, runs: 200}};\n"
     config.write_text(content, "utf-8")
 
 
@@ -60,8 +61,9 @@ class TruffleRunner(Runner):
         if mutation:
             _apply_mutation(mutation, temp_dir)
         try:
-            if original_bytecode and self.truffle_tester.check_bytecodes(temp_dir, original_bytecode):
-                raise EquivalentMutant
+            if original_bytecode is not None and original_bytecode != {}:
+                if self.truffle_tester.check_bytecodes(temp_dir, original_bytecode):
+                    raise EquivalentMutant
             else:
                 result = self.truffle_tester.run_test_command(temp_dir, timeout=timeout, network_name=network)
         finally:

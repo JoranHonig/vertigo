@@ -1,5 +1,5 @@
 from eth_vertigo.test_runner.truffle.truffle_tester import TruffleTester
-from eth_vertigo.mutation.truffle.truffle_compiler import TruffleCompiler
+from eth_vertigo.core.truffle.truffle_compiler import TruffleCompiler
 
 from eth_vertigo.test_runner.exceptions import TestRunException, TimedOut
 from eth_vertigo.test_runner import TestResult
@@ -55,7 +55,7 @@ class Truffle(TruffleTester, TruffleCompiler):
 
         with TemporaryFile() as stdin, TemporaryFile() as stdout:
             stdin.seek(0)
-            proc = Popen(command, stdin=stdin, stdout=stdout, cwd=working_directory)
+            proc = Popen(command, stdin=stdin, stdout=stdout, stderr=stdout, cwd=working_directory)
             try:
                 proc.wait(timeout=timeout)
             except TimeoutExpired:
@@ -81,10 +81,14 @@ class Truffle(TruffleTester, TruffleCompiler):
         test_result = "\n".join(test_result)
 
         if errors:
+            print("Test output:")
+            print(output.decode('utf-8'))
             raise TestRunException("\n".join(errors))
         try:
             return self._normalize_mocha(loads(test_result))
         except JSONDecodeError:
+            print("Test output:")
+            print(output.decode('utf-8'))
             raise TestRunException("Encountered error during test output analysis")
 
     def check_bytecodes(self, working_directory: str, original_bytecode: Dict[str, str]) -> bool:
@@ -107,8 +111,7 @@ class Truffle(TruffleTester, TruffleCompiler):
         :return: bytecodes in the shape {'contractName': '0x00'}
         """
         w_dir = Path(working_directory)
-        if not (w_dir / "build").is_dir():
-            self.run_compile_command(working_directory)
+        self.run_compile_command(working_directory)
         if not (w_dir / "build").is_dir():
             logger.error("Compilation did not create build directory")
 

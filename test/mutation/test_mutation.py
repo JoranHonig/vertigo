@@ -2,7 +2,7 @@ import pytest
 from pathlib import Path
 from eth_vertigo.source.source_file import SourceFile
 
-from eth_vertigo.mutation.mutation import Mutation, MutationResult
+from eth_vertigo.core.mutation import Mutation, MutationResult
 
 
 def test_create_mutation(tmp_path: Path):

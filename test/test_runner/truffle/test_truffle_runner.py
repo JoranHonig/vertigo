@@ -4,7 +4,7 @@ import pytest
 
 from unittest.mock import MagicMock
 
-from eth_vertigo.mutation import Mutation
+from eth_vertigo.core import Mutation
 from eth_vertigo.source.source_file import SourceFile
 from eth_vertigo.test_runner.truffle.truffle_tester import TruffleTester
 from eth_vertigo.test_runner.truffle.truffle_runner import _make_temp_truffle_directory, _rm_temp_truffle_directory, \
@@ -51,7 +51,11 @@ def test_set_reporter(tmp_path: Path):
     _set_reporter(str(tmp_path))
 
     # Assert
-    assert pre_text + "\nmodule.exports.mocha = {reporter: \"json\"}\n" == truffle_js.read_text("utf-8")
+    expected = pre_text + \
+           "\nmodule.exports.mocha = {reporter: \"json\"};\n" + \
+           "\nmodule.exports.solc = {optimizer: { enabled: true, runs: 200}};\n"
+    actual = truffle_js.read_text("utf-8")
+    assert expected == actual
 
 
 def test_apply_mutation(tmp_path):
