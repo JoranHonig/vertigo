@@ -1,8 +1,9 @@
 from eth_vertigo.mutator.source_file import SourceFile
 from pathlib import Path
+from eth_vertigo.mutator.mutator import Mutator
 
 
-class Mutator:
+class SourceMutator(Mutator):
     def mutate(self, source_file: SourceFile, project_directory: Path):
         if not source_file.file.exists():
             return []

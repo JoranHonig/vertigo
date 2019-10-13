@@ -1,5 +1,5 @@
 from eth_vertigo.mutator.solidity.solidity_file import SolidityFile
-from eth_vertigo.mutator.source_mutator import Mutator
+from eth_vertigo.mutator.source_mutator import SourceMutator
 from eth_vertigo.core.mutation import Mutation
 from pathlib import Path
 
@@ -69,7 +69,7 @@ def _mutate_assignment(
         )
 
 
-class SolidityMutator(Mutator):
+class SolidityMutator(SourceMutator):
     @staticmethod
     def mutate_boundary_conditionals(source_file: SolidityFile, project_directory: Path):
         return _mutate_binary_op(conditional_boundary_mutator, source_file, project_directory)
