@@ -5,7 +5,7 @@ import pytest
 from unittest.mock import MagicMock
 
 from eth_vertigo.core import Mutation
-from eth_vertigo.source.source_file import SourceFile
+from eth_vertigo.mutator.source_file import SourceFile
 from eth_vertigo.test_runner.truffle.truffle_tester import TruffleTester
 from eth_vertigo.test_runner.truffle.truffle_runner import _make_temp_truffle_directory, _rm_temp_truffle_directory, \
     _set_reporter, _apply_mutation, TruffleRunner
@@ -60,7 +60,7 @@ def test_set_reporter(tmp_path: Path):
 
 def test_apply_mutation(tmp_path):
     # Arrange
-    file_path = tmp_path / "source.sol"  # type: Path
+    file_path = tmp_path / "mutator.sol"  # type: Path
     file_path.touch()
     source_file = SourceFile(file_path)
     src_field = (1, 1, 0)
@@ -155,7 +155,7 @@ def test_truffle_runner_run_coverage(tmp_path):
 
 def test_truffle_runner_run_test_with_mutation(tmp_path):
     # Arrange
-    file_path = tmp_path / "source.sol"  # type: Path
+    file_path = tmp_path / "mutator.sol"  # type: Path
     file_path.touch()
     source_file = SourceFile(file_path)
     src_field = (1, 1, 0)

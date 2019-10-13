@@ -50,7 +50,7 @@ class TruffleRunner(Runner):
         """
         Runs all the tests in the truffle project in a clean environment
         :param coverage: Whether to run the tests with coverage
-        :param mutation: List indicating edits that need to be performed on source files
+        :param mutation: List indicating edits that need to be performed on mutator files
         :return: Test results
         """
         if coverage:

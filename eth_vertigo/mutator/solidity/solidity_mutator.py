@@ -1,5 +1,5 @@
-from eth_vertigo.source.solidity.solidity_file import SolidityFile
-from eth_vertigo.source.source_mutator import Mutator
+from eth_vertigo.mutator.solidity.solidity_file import SolidityFile
+from eth_vertigo.mutator.source_mutator import Mutator
 from eth_vertigo.core.mutation import Mutation
 from pathlib import Path
 

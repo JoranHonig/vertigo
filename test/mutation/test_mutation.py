@@ -1,6 +1,6 @@
 import pytest
 from pathlib import Path
-from eth_vertigo.source.source_file import SourceFile
+from eth_vertigo.mutator.source_file import SourceFile
 
 from eth_vertigo.core.mutation import Mutation, MutationResult
 
