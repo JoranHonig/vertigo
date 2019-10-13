@@ -1,6 +1,8 @@
 from pathlib import Path
 from typing import Generator
 from eth_vertigo.core import Mutation
+from eth_vertigo.mutator.source_file import SourceFile
+from re import finditer
 
 
 class Rule:
@@ -20,5 +22,12 @@ class Rule:
         self.match = match
         self.replace = replace
 
-    def generate_mutants(self, file: Path) -> Generator[Mutation]:
-        pass
+    def generate_mutants(self, source: SourceFile, project_directory: Path) -> Generator[Mutation]:
+        file = source.file
+        file_content = file.read_text(encoding="utf-8")
+
+        for occurrence in finditer(self.match, file_content):
+            start = occurrence.start()
+            end = occurrence.end()
+            size = end - start
+            yield Mutation((start, size, 0), source, self.replace, project_directory)
