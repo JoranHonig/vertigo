@@ -30,7 +30,7 @@ class Rule:
         file_content = file.read_text(encoding="utf-8")
 
         for occurrence in finditer(self.match, file_content):
-            start = occurrence.start() - 1
+            start = occurrence.start()
             end = occurrence.end() - 1
             size = end - start
             yield Mutation((start, size, 0), source, self.replace, project_directory)
