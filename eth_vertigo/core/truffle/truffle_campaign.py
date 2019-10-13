@@ -1,3 +1,4 @@
+from eth_vertigo.mutator.mutator import Mutator
 from eth_vertigo.mutator.truffle.solidity_file import SolidityFile
 from eth_vertigo.mutator.solidity.solidity_mutator import SolidityMutator
 from eth_vertigo.test_runner.truffle import TruffleRunnerFactory
@@ -20,7 +21,15 @@ class TruffleCampaign(Campaign):
 
     Implements specific campaign logic for the truffle framework
     """
-    def __init__(self, project_directory: Path, truffle_compiler: TruffleCompiler, truffle_runner_factory: TruffleRunnerFactory, networks: List[str] = (), filters=None):
+    def __init__(
+            self,
+            project_directory: Path,
+            truffle_compiler: TruffleCompiler,
+            truffle_runner_factory: TruffleRunnerFactory,
+            mutators: List[Mutator],
+            networks: List[str] = (),
+            filters=None
+    ):
         super().__init__(filters=filters)
         self.project_directory = project_directory
         self.source_directory = project_directory / "build" / "contracts"
@@ -33,6 +42,8 @@ class TruffleCampaign(Campaign):
         self.bytecodes = {}
 
         self.truffle_runner_factory = truffle_runner_factory
+        self.mutators = mutators
+        self.mutators.append(SolidityMutator())
 
         for network in networks:
             self.networks_queue.put(network)
@@ -72,9 +83,9 @@ class TruffleCampaign(Campaign):
         return True
 
     def setup(self):
-        mutator = SolidityMutator()
         for source in self.sources:
-            self.mutations += mutator.mutate(source, self.project_directory)
+            for mutator in self.mutators:
+                self.mutations += mutator.mutate(source, self.project_directory)
         for f in self.filters:
             self.mutations = f.apply(self.mutations)
         self.is_set_up = True
