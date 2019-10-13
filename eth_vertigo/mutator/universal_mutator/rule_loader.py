@@ -11,17 +11,19 @@ class RuleLoader:
     This class implements the logic to load universal mutator style mutation rules
     """
 
-    def load_from_file(self, file: Path) -> Generator[Rule]:
+    def load_from_file(self, file: Path) -> Generator[Rule, None, None]:
         """Load mutation rules from file"""
         file_contents = file.read_text(encoding='utf-8')
         return self.load_from_txt(file_contents)
 
-    def load_from_txt(self, rule_txt: str) -> Generator[Rule]:
+    def load_from_txt(self, rule_txt: str) -> Generator[Rule, None, None]:
         """Load mutation rules from text"""
         for line in rule_txt.split("\n"):
             # Deal with non mutation rule lines
             if "==>" not in line:
                 if line.startswith("#"):
+                    continue
+                if line == "":
                     continue
                 logger.warning(f"Error while parsing Universal Mutator rules:\n{line}")
                 continue

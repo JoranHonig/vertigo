@@ -22,7 +22,7 @@ class Rule:
         self.match = match
         self.replace = replace
 
-    def generate_mutants(self, source: SourceFile, project_directory: Path) -> Generator[Mutation]:
+    def generate_mutants(self, source: SourceFile, project_directory: Path) -> Generator[Mutation, None, None]:
         file = source.file
         file_content = file.read_text(encoding="utf-8")
 
