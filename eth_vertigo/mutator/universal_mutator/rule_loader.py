@@ -45,5 +45,5 @@ class RuleLoader:
             # drop return char if present
             if replace and replace[-1] == '\n':
                 replace = replace[:-1]
-
+                replace.strip(' ')
             yield Rule(match, replace)

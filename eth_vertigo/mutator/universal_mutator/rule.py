@@ -23,11 +23,14 @@ class Rule:
         self.replace = replace
 
     def generate_mutants(self, source: SourceFile, project_directory: Path) -> Generator[Mutation, None, None]:
+        if self.replace in ("DO_NOT_MUTATE", ):
+            return
+
         file = source.file
         file_content = file.read_text(encoding="utf-8")
 
         for occurrence in finditer(self.match, file_content):
-            start = occurrence.start()
-            end = occurrence.end()
+            start = occurrence.start() - 1
+            end = occurrence.end() - 1
             size = end - start
             yield Mutation((start, size, 0), source, self.replace, project_directory)
