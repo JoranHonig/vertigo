@@ -14,17 +14,17 @@ pip3 install --user eth-vertigo
 You can now run vertigo on a truffle project with the following command (assuming you have a `development` network configured in your`truffle-config.js`):
 
 ```bash
-vertigo run --network development
+eth_vertigo run --network development
 ```
 Depending on your environment it might be required to specify the location of the truffle executable:
 ```bash
-vertigo run --network development --truffle <node_dir>/bin/truffle 
+eth_vertigo run --network development --truffle <node_dir>/bin/truffle 
 ```
 
 There are a few additional parameters available that allow you to tweak the execution of vertigo:
 ```bash
-$ vertigo run --help                                                                                                                                                ⬡ 9.11.2 [±master ●●▴]
-Usage: vertigo run [OPTIONS]
+$ eth_vertigo run --help                                                                                                                                                ⬡ 9.11.2 [±master ●●▴]
+Usage: eth_vertigo run [OPTIONS]
 
   Performs a mutation test campaign
 
