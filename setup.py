@@ -17,7 +17,7 @@ setup(
     description="Mutation Testing for Ethereum Smart Contracts",
     long_description=README,
     long_description_content_type="text/markdown",
-    url="https://github.com/joranhonig/eth_vertigo",
+    url="https://github.com/joranhonig/vertigo",
     author="Joran Honig",
     author_email="joran.honig@gmail.com",
     license="GPLv3",
