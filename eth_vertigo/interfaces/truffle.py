@@ -10,6 +10,10 @@ from pathlib import Path
 from typing import Dict, Union
 from loguru import logger
 import json
+import re
+
+swarm_hash_regex = re.compile("((a165)(.*)(5820)[a-f0-9]{64}(0029))$")
+
 
 class Truffle(TruffleTester, TruffleCompiler):
     """ Truffle interface object, deals with the ugly commandline details"""
@@ -128,8 +132,13 @@ class Truffle(TruffleTester, TruffleCompiler):
                 logger.warning(f"Could not read compilation result for {contract.name}")
                 continue
 
-            current_bytecode[contract_compilation_result["contractName"]] = contract_compilation_result["bytecode"]
+            current_bytecode[contract_compilation_result["contractName"]] = \
+                self._strip_metadata(contract_compilation_result["bytecode"])
         return current_bytecode
+
+    @staticmethod
+    def _strip_metadata(bytecode: str) -> str:
+        return swarm_hash_regex.sub("", bytecode)
 
     @staticmethod
     def _normalize_mocha(mocha_json: dict) -> Dict[str, TestResult]:
