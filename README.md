@@ -1,5 +1,6 @@
 # vertigo
 [![Build Status](https://travis-ci.org/JoranHonig/vertigo.svg?branch=master)](https://travis-ci.org/JoranHonig/vertigo)
+[![Gitter](https://badges.gitter.im/eth-vertigo/community.svg)](https://gitter.im/eth-vertigo/community?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge)
 
 Vertigo is a mutation testing framework designed to work specifically for smart contracts.
 This mutation testing framework implements a range of mutation operators that are either selected from previous works or tailored to solidity.
@@ -53,5 +54,6 @@ title="Practical Mutation Testing for Smart Contracts",
 booktitle="Data Privacy Management, Cryptocurrencies and Blockchain Technology",
 year="2019",
 publisher="Springer International Publishing",
-pages="289--303",
+pages="289--303"
+}
 ```
