@@ -30,7 +30,7 @@ setup(
     install_requires=requirements,
     entry_points={
         "console_scripts": [
-            "eth_vertigo=eth_vertigo.cli.main:cli",
+            "vertigo=eth_vertigo.cli.main:cli",
         ]
     },
 )
