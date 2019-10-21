@@ -18,7 +18,7 @@ vertigo run --network development
 ```
 Depending on your environment it might be required to specify the location of the truffle executable:
 ```bash
-vertigo run --network development --truffle <node_dir>/bin/truffle 
+vertigo run --network development --truffle-location <node_dir>/bin/truffle 
 ```
 
 There are a few additional parameters available that allow you to tweak the execution of vertigo:
