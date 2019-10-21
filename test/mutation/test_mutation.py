@@ -39,7 +39,7 @@ def test_relative_path(tmp_path):
     relative_path = mutation.relative_path
 
     # Assert
-    assert "testdir/sf.txt" == relative_path
+    assert Path("testdir/sf.txt") == Path(relative_path)
 
 
 def test_get_mutated_line(tmp_path):
