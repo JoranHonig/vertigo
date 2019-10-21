@@ -12,7 +12,7 @@ from loguru import logger
 import json
 import re
 
-swarm_hash_regex = re.compile("((a165)(627a7a7230627a7a7230)(5820)[a-f0-9]{62}(0029))$")
+swarm_hash_regex = re.compile("((a165)(.*)(5820)[a-f0-9]{64}(0029))$")
 
 
 class Truffle(TruffleTester, TruffleCompiler):
