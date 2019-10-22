@@ -24,20 +24,22 @@ vertigo run --network development --truffle-location <node_dir>/bin/truffle
 
 There are a few additional parameters available that allow you to tweak the execution of vertigo:
 ```bash
-$ vertigo run --help                                                                                                                                                ⬡ 9.11.2 [±master ●●▴]
-Usage: vertigo run [OPTIONS]
+$ python vertigo.py run --help                                                                                                                                                 ⬡ 9.11.2 [±master ●●]
+Usage: vertigo.py run [OPTIONS]
 
-  Performs a mutation test campaign
+  Performs a core test campaign
 
 Options:
-  --output TEXT            Output mutation test results to file
+  --output TEXT            Output core test results to file
   --network TEXT           Network names that vertigo can use
+  --rules TEXT             Universal Mutator style rules to use in mutation
+                           testing
   --truffle-location TEXT  Location of truffle cli
   --sample-ratio FLOAT     If this option is set. Vertigo will apply the
                            sample filter with the given ratio
   --exclude TEXT           Vertigo won't mutate files in these directories
   --help                   Show this message and exit.
-                                                       
+                                                                  
 ```
 ### Publications and Articles
 [Practical Mutation Testing for Smart Contracts](https://link.springer.com/chapter/10.1007/978-3-030-31500-9_19) - Joran J. Honig, Maarten H. Everts, Marieke Huisman
