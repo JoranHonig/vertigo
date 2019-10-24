@@ -24,7 +24,7 @@ vertigo run --network development --truffle-location <node_dir>/bin/truffle
 
 There are a few additional parameters available that allow you to tweak the execution of vertigo:
 ```bash
-$ python vertigo.py run --help                                                                                                                                                 ⬡ 9.11.2 [±master ●●]
+$ python vertigo.py run --help
 Usage: vertigo.py run [OPTIONS]
 
   Performs a core test campaign
@@ -41,6 +41,23 @@ Options:
   --help                   Show this message and exit.
                                                                   
 ```
+
+### Known Issues
+
+**Ganache** is generally used only for a single run of the entire test suite. 
+For the general use case, it does not matter if Ganache creates a few thousand files.
+Unfortunately, once you start executing the entire test suite hundreds of times, you can end up with millions of files, and your machine could run out of free inode's.
+You can check whether this happens to you by running:
+```
+df -i
+```
+
+This issue ([#1](https://github.com/JoranHonig/vertigo/issues/1)) is known, and we're working on a fix.
+ 
+In the meanwhile. If your test suite is large enough to munch all your inodes, then there are two options:
+ - You can use the command line option `--sample-ratio` to select a random subsample of the mutations (reducing the number of times that the test suite is run)
+ - You can create a partition that has a sufficient amount of inodes available
+
 ### Publications and Articles
 [Practical Mutation Testing for Smart Contracts](https://link.springer.com/chapter/10.1007/978-3-030-31500-9_19) - Joran J. Honig, Maarten H. Everts, Marieke Huisman
 
