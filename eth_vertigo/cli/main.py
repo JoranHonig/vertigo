@@ -1,6 +1,7 @@
 import click
 from os import getcwd
 from pathlib import Path
+from  yaml import safe_load as yaml_safe_load
 from eth_vertigo.core import MutationResult
 from eth_vertigo.core.truffle.truffle_campaign import TruffleCampaign
 from eth_vertigo.core.filters.sample_filter import SampleFilter
@@ -22,14 +23,28 @@ def cli():
 @click.option('--output', help="Output core test results to file", nargs=1, type=str)
 @click.option('--network', help="Network names that vertigo can use", multiple=True)
 @click.option('--rules', help="Universal Mutator style rules to use in mutation testing", multiple=True)
-@click.option('--truffle-location', help="Location of truffle cli", nargs=1, type=str, default="truffle")
+@click.option('--truffle-location', help="Location of truffle cli", nargs=1, type=str)
 @click.option('--sample-ratio', help="If this option is set. Vertigo will apply the sample filter with the given ratio", nargs=1, type=float)
 @click.option('--exclude', help="Vertigo won't mutate files in these directories", multiple=True)
-def run(output, network, rules, truffle_location, sample_ratio, exclude):
+@click.option('--config', help="Name of yml formatted configuration file", nargs=1, type=str)
+def run(output, network, rules, truffle_location, sample_ratio, exclude, config):
     """ Run command """
     click.echo("[*] Starting core testing")
 
     # Setup global parameters
+    config_path = Path(getcwd())/config
+    settings = dict()
+    if config:
+        with open(config_path) as config_file:
+            settings.update(yaml_safe_load(config_file))
+    
+    output = output or settings.get('output', str())
+    network = network or settings.get('network', tuple())
+    rules = rules or settings.get('rules', tuple())   
+    truffle_location = truffle_location or settings.get('truffle-location', 'truffle')
+    sample_ratio = sample_ratio or settings.get('sample_ratio', float())
+    exclude = exclude or settings.get('exclude', tuple())
+ 
     truffle = Truffle(truffle_location)
 
     working_directory = getcwd()

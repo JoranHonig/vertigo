@@ -4,3 +4,4 @@ click
 tqdm
 jinja2
 loguru
+PyYAML
