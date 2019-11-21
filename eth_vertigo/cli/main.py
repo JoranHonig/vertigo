@@ -27,7 +27,7 @@ def cli():
 @click.option('--exclude', help="Vertigo won't mutate files in these directories", multiple=True)
 def run(output, network, rules, truffle_location, sample_ratio, exclude):
     """ Run command """
-    click.echo("[*] Starting core testing")
+    click.echo("[*] Starting mutation testing")
 
     # Setup global parameters
     truffle = Truffle(truffle_location)
