@@ -63,6 +63,8 @@ In the meanwhile. If your test suite is large enough to munch all your inodes, t
 
 [Introduction into Mutation Testing](https://medium.com/swlh/introduction-into-mutation-testing-d6512dc702b0?source=friends_link&sk=2878e0c08b6301a125198a264e43edb4) - Joran Honig
 
+[Mutation Testing for Smart Contracts - A step by step guide](https://medium.com/@joran.honig/mutation-testing-for-smart-contracts-a-step-by-step-guide-68c838ca2094) - Joran Honig
+
 If you want to cite vertigo, please use the following:
 ```
 @InProceedings{10.1007/978-3-030-31500-9_19,
