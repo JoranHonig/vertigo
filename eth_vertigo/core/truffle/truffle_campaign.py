@@ -80,7 +80,7 @@ class TruffleCampaign(Campaign):
         if test_result is None:
             return False
 
-        return True
+        return all([result.success for result in test_result.values()])
 
     def setup(self):
         for source in self.sources:
