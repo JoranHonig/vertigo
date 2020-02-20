@@ -66,14 +66,14 @@ class TruffleRunner(Runner):
         temp_dir = _make_temp_truffle_directory(self.project_directory)
         _clean_build_directory(temp_dir)
         _set_reporter(temp_dir)
+
         if mutation:
             _apply_mutation(mutation, temp_dir)
         try:
             if original_bytecode is not None and original_bytecode != {}:
                 if self.truffle_tester.check_bytecodes(temp_dir, original_bytecode):
                     raise EquivalentMutant
-            else:
-                result = self.truffle_tester.run_test_command(temp_dir, timeout=timeout, network_name=network)
+            result = self.truffle_tester.run_test_command(temp_dir, timeout=timeout, network_name=network)
         finally:
             _rm_temp_truffle_directory(temp_dir)
 
