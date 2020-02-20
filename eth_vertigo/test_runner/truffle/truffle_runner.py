@@ -11,10 +11,17 @@ from distutils.dir_util import copy_tree
 import shutil
 from typing import Dict
 
+
 def _make_temp_truffle_directory(original_dir: str):
     td = mkdtemp()
     copy_tree(original_dir, td, preserve_symlinks=1)
     return td
+
+
+def _clean_build_directory(project_path: str):
+    build_dir = Path(project_path) / "build"
+    if build_dir.is_dir():
+        shutil.rmtree(build_dir)
 
 
 def _set_reporter(directory: str):
@@ -57,6 +64,7 @@ class TruffleRunner(Runner):
             raise NotImplementedError
 
         temp_dir = _make_temp_truffle_directory(self.project_directory)
+        _clean_build_directory(temp_dir)
         _set_reporter(temp_dir)
         if mutation:
             _apply_mutation(mutation, temp_dir)
