@@ -96,7 +96,7 @@ class Truffle(TruffleTester, TruffleCompiler):
             raise TestRunException("Encountered error during test output analysis")
 
     def check_bytecodes(self, working_directory: str, original_bytecode: Dict[str, str]) -> bool:
-        """ Returns whether any of the bytecodes differ from the original bytecodes
+        """ Returns whether none of the bytecodes differ from the original bytecodes
 
         :param working_directory: The truffle directory for which we should check the bytecodes
         :param original_bytecode: The original bytecodes {'contractName': '0x00'}
