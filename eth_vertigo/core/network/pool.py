@@ -19,9 +19,9 @@ class NetworkPool(ABC):
         pass
 
 
-class StaticNetworkPool:
+class StaticNetworkPool(NetworkPool):
     def __init__(self, networks: List[str]):
-        self.available_networks = []
+        self.available_networks = list(networks)
         self.claimed_networks = []
 
     def claim(self) -> str:
@@ -40,7 +40,7 @@ class StaticNetworkPool:
         self.available_networks.append(network)
 
 
-class DynamicNetworkPool:
+class DynamicNetworkPool(NetworkPool):
     def __init__(self, networks: List[Tuple[str, int]], builder: Callable):
         self.available_networks = {n[0]: Network(n[0], n[1]) for n in networks}  # type: Dict
         self.claimed_networks = {}
@@ -55,11 +55,11 @@ class DynamicNetworkPool:
 
         # Put it in the claimed networks
         self.claimed_networks[network.name] = network
-        self.claimed_networks.provider = self.builder(network.port)
+        network.provider = self.builder(network.port)
 
         # Spin up the dynamic network
         try:
-            self.claimed_networks.provider.start()
+            network.provider.start()
         except ValueError:
             raise
 

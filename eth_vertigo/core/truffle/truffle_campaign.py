@@ -7,7 +7,7 @@ from eth_vertigo.core import Mutation, MutationResult
 from eth_vertigo.core.campaign import Campaign
 from eth_vertigo.core.truffle.truffle_compiler import TruffleCompiler
 from eth_vertigo.test_runner.exceptions import TestRunException, TimedOut
-
+from eth_vertigo.core.network import NetworkPool
 from typing import List, Callable
 from time import time
 from pathlib import Path
@@ -27,7 +27,7 @@ class TruffleCampaign(Campaign):
             truffle_compiler: TruffleCompiler,
             truffle_runner_factory: TruffleRunnerFactory,
             mutators: List[Mutator],
-            networks: List[str] = (),
+            network_pool: NetworkPool,
             filters=None
     ):
         super().__init__(filters=filters)
@@ -37,16 +37,12 @@ class TruffleCampaign(Campaign):
 
         self.sources = list(self._get_sources())
         self.base_run_time = None
-        self.networks = networks
-        self.networks_queue = Queue(maxsize=len(networks))
+        self.network_pool = network_pool
         self.bytecodes = {}
 
         self.truffle_runner_factory = truffle_runner_factory
         self.mutators = mutators
         self.mutators.append(SolidityMutator())
-
-        for network in networks:
-            self.networks_queue.put(network)
 
     def _get_sources(self, dir=None):
         """ Implements basic mutator file discovery """
@@ -68,13 +64,15 @@ class TruffleCampaign(Campaign):
         begin = time()
 
         network = None
-        if self.networks:
-            network = self.networks_queue.get()
+        try:
+            network = self.network_pool.claim()
+        except ValueError:
+            return False
+
         try:
             test_result = tr.run_tests(network=network)
         finally:
-            if self.networks:
-                self.networks_queue.put(network)
+            self.network_pool.yield_network(network)
 
         self.base_run_time = time() - begin
         if test_result is None:
@@ -94,9 +92,13 @@ class TruffleCampaign(Campaign):
         """ Run the test suite using a core and check for murders """
         tr = self.truffle_runner_factory.create(str(self.project_directory))
         mutation.result = MutationResult.LIVED
-        network = None
-        if self.networks:
-            network = self.networks_queue.get()
+
+        try:
+            network = self.network_pool.claim()
+        except ValueError:
+            mutation.result = MutationResult.ERROR
+            return
+
         try:
             try:
                 test_result = tr.run_tests(
@@ -115,8 +117,7 @@ class TruffleCampaign(Campaign):
             logging.warning(str(e))
             mutation.result = MutationResult.ERROR
         finally:
-            if self.networks:
-                self.networks_queue.put(network)
+            self.network_pool.yield_network(network)
             done_callback()
             return
 
