@@ -2,6 +2,7 @@ import click
 from os import getcwd
 from pathlib import Path
 from eth_vertigo.core import MutationResult
+from eth_vertigo.core.network import DynamicNetworkPool, StaticNetworkPool, Ganache
 from eth_vertigo.core.truffle.truffle_campaign import TruffleCampaign
 from eth_vertigo.core.filters.sample_filter import SampleFilter
 from eth_vertigo.core.filters.exclude_filter import ExcludeFilter
@@ -21,11 +22,25 @@ def cli():
 @cli.command(help="Performs a core test campaign")
 @click.option('--output', help="Output core test results to file", nargs=1, type=str)
 @click.option('--network', help="Network names that vertigo can use", multiple=True)
+@click.option('--ganache-path', help="Path to ganache binary", type=str, default="ganache-cli")
+@click.option('--ganache-network', help="Dynamic networks that vertigo can use eg. (develop, 8485)",
+              multiple=True, type=(str, int))
+@click.option('--ganache-network-options', help="Options to pass to dynamic ganache networks", type=str)
 @click.option('--rules', help="Universal Mutator style rules to use in mutation testing", multiple=True)
 @click.option('--truffle-location', help="Location of truffle cli", nargs=1, type=str, default="truffle")
 @click.option('--sample-ratio', help="If this option is set. Vertigo will apply the sample filter with the given ratio", nargs=1, type=float)
 @click.option('--exclude', help="Vertigo won't mutate files in these directories", multiple=True)
-def run(output, network, rules, truffle_location, sample_ratio, exclude):
+def run(
+        output,
+        network,
+        ganache_path,
+        ganache_network,
+        ganache_network_options,
+        rules,
+        truffle_location,
+        sample_ratio,
+        exclude
+):
     """ Run command """
     click.echo("[*] Starting mutation testing")
 
@@ -37,6 +52,10 @@ def run(output, network, rules, truffle_location, sample_ratio, exclude):
     filters = []
     if exclude:
         filters.append(ExcludeFilter(exclude))
+
+    if network and ganache_network:
+        click.echo("[-] Can't use dynamic networks and regular networks simultaniously")
+        exit(1)
 
     if project_type == "truffle":
         click.echo("[*] Starting analysis on truffle project")
@@ -59,17 +78,31 @@ def run(output, network, rules, truffle_location, sample_ratio, exclude):
                 um.load_rule(Path(rule_file))
             mutators.append(um)
 
+        if network:
+            network_pool = StaticNetworkPool(network)
+        elif ganache_network:
+            network_pool = DynamicNetworkPool(
+                ganache_network,
+                lambda port: Ganache(port, ganache_path, [ganache_network_options])
+            )
+        else:
+            click.echo("[-] Vertigo needs at least one network to run analyses on")
+            return
+
         try:
             campaign = TruffleCampaign(
                 project_directory=project_path,
                 truffle_compiler=truffle,
                 mutators=mutators,
                 truffle_runner_factory=TruffleRunnerFactory(truffle),
-                networks=network,
+                network_pool=network_pool,
                 filters=filters,
             )
         except:
             click.echo("[-] Encountered an error while setting up the core campaign")
+            for node in network_pool.claimed_networks.keys():
+                click.echo(f"[+] Cleaning up network: {node}")
+                network_pool.yield_network(node)
             raise
     else:
         click.echo("[*] Could not find supported project directory in {}".format(working_directory))
