@@ -18,6 +18,11 @@ class NetworkPool(ABC):
     def yield_network(self, network: str):
         pass
 
+    @property
+    @abstractmethod
+    def size(self):
+        pass
+
 
 class StaticNetworkPool(NetworkPool):
     def __init__(self, networks: List[str]):
@@ -38,6 +43,10 @@ class StaticNetworkPool(NetworkPool):
             raise ValueError("Trying to yield unclaimed network")
         self.claimed_networks.remove(network)
         self.available_networks.append(network)
+
+    @property
+    def size(self):
+        return len(self.available_networks) + len(self.claimed_networks)
 
 
 class DynamicNetworkPool(NetworkPool):
@@ -79,3 +88,8 @@ class DynamicNetworkPool(NetworkPool):
 
         # Yield the network back
         self.available_networks[network.name] = network
+
+
+    @property
+    def size(self):
+        return len(self.available_networks) + len(self.claimed_networks)
