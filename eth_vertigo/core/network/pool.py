@@ -81,15 +81,15 @@ class DynamicNetworkPool(NetworkPool):
             # Put it in the claimed networks
             self.claimed_networks[network.name] = network
             network.provider = self.builder(network.port)
-
-            # Spin up the dynamic network
-            try:
-                network.provider.start()
-            except ValueError:
-                raise
-            return network.name
         finally:
             self.lock.release()
+        # Spin up the dynamic network
+        try:
+            network.provider.start()
+        except ValueError:
+            raise
+        return network.name
+
 
     def yield_network(self, network: str):
         self.lock.acquire()
