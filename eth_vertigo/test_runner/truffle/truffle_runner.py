@@ -3,7 +3,7 @@ from eth_vertigo.test_runner.file_editor import FileEditor
 from eth_vertigo.test_runner.truffle.truffle_tester import TruffleTester
 from eth_vertigo.test_runner.exceptions import EquivalentMutant
 from eth_vertigo.core import Mutation, MutationResult
-from typing import Generator
+from typing import Generator, List
 
 from pathlib import Path
 from tempfile import mkdtemp
@@ -34,6 +34,18 @@ def _set_reporter(directory: str):
     config.write_text(content, "utf-8")
 
 
+def _set_include_tests(directory: str, test_names: List[str]):
+    config = Path(directory) / "truffle.js"
+    if not config.is_file():
+        config = Path(directory) / "truffle-config.js"
+
+    content = config.read_text("utf-8")
+
+    test_regex = "({})".format("|".join(test_names))
+    content += "\nmodule.exports.mocha.grep= \"" + test_regex + "\";\n"
+    config.write_text(content, "utf-8")
+
+
 def _rm_temp_truffle_directory(temp_dir: str):
     shutil.rmtree(temp_dir)
 
@@ -53,7 +65,15 @@ class TruffleRunner(Runner):
     def tests(self) -> Generator[str, None, None]:
         raise NotImplementedError
 
-    def run_tests(self, coverage: bool = False, mutation: Mutation = None, timeout=None, network: str = None, original_bytecode: Dict[str, str] = None) -> dict:
+    def run_tests(
+            self,
+            coverage: bool = False,
+            mutation: Mutation = None,
+            timeout=None,
+            network: str = None,
+            original_bytecode: Dict[str, str] = None,
+            suggestions: List[str] = None,
+    ) -> dict:
         """
         Runs all the tests in the truffle project in a clean environment
         :param coverage: Whether to run the tests with coverage
@@ -66,6 +86,8 @@ class TruffleRunner(Runner):
         temp_dir = _make_temp_truffle_directory(self.project_directory)
         _clean_build_directory(temp_dir)
         _set_reporter(temp_dir)
+        if suggestions:
+            _set_include_tests(temp_dir, suggestions)
 
         if mutation:
             _apply_mutation(mutation, temp_dir)

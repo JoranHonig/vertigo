@@ -28,9 +28,10 @@ class TruffleCampaign(Campaign):
             truffle_runner_factory: TruffleRunnerFactory,
             mutators: List[Mutator],
             network_pool: NetworkPool,
-            filters=None
+            filters=None,
+            suggesters=None
     ):
-        super().__init__(filters=filters)
+        super().__init__(filters=filters, suggesters=suggesters)
         self.project_directory = project_directory
         self.source_directory = project_directory / "build" / "contracts"
         self.truffle_compiler = truffle_compiler
@@ -98,6 +99,12 @@ class TruffleCampaign(Campaign):
         except ValueError:
             mutation.result = MutationResult.ERROR
             return
+        suggestions = []
+        for suggester in self.suggesters:
+            if suggester.is_strict:
+                # Not yet Implemented
+                continue
+            suggestions.extend(suggester.suggest_tests(mutation))
 
         try:
             try:
@@ -105,12 +112,25 @@ class TruffleCampaign(Campaign):
                     mutation=mutation,
                     timeout=int(self.base_run_time) * 2,
                     network=network,
-                    original_bytecode=self.bytecodes
+                    original_bytecode=self.bytecodes,
+                    suggestions=suggestions if suggestions else None
                 )
                 killers = [test for test in test_result.values() if not test.success]
                 if killers:
                     mutation.result = MutationResult.KILLED
                     mutation.crime_scenes = [killer.full_title for killer in killers]
+                elif suggestions:
+                    # If the suggestions didn't lead to a killer
+                    test_result = tr.run_tests(
+                        mutation=mutation,
+                        timeout=int(self.base_run_time) * 2,
+                        network=network,
+                        original_bytecode=self.bytecodes,
+                    )
+                    killers = [test for test in test_result.values() if not test.success]
+                    if killers:
+                        mutation.result = MutationResult.KILLED
+                        mutation.crime_scenes = [killer.full_title for killer in killers]
             except EquivalentMutant:
                 mutation.result = MutationResult.EQUIVALENT
         except TimedOut:

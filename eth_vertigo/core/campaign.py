@@ -1,9 +1,10 @@
 from typing import Callable, List
 from eth_vertigo.core.filter import MutationFilter
 
-from eth_vertigo.core import Mutation, MutationResult
+from eth_vertigo.core import Mutation, MutationResult, TestSuggester
 from jinja2 import PackageLoader, Environment
 from concurrent.futures import ThreadPoolExecutor
+
 
 environment = Environment(
         loader=PackageLoader("eth_vertigo.core"), trim_blocks=True
@@ -48,12 +49,13 @@ class Campaign:
     A core campaign class orchestrates and manages a core testing run
     """
 
-    def __init__(self, filters: List[MutationFilter] = None):
+    def __init__(self, filters: List[MutationFilter] = None , suggesters=None):
         self.sources = []
         self.project_directory = None
         self.mutations = []
         self.is_set_up = False
         self.filters = filters or []
+        self.suggesters = suggesters or []  # type: List[TestSuggester]
 
     def setup(self):
         """ Sets up the campaign for execution"""
