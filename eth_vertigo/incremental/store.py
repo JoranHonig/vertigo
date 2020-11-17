@@ -9,7 +9,7 @@ class IncrementalMutationStore:
 
     @property
     def yaml(self):
-        return yaml.dump(self.__dict__)
+        return yaml.dump({"known_mutations": [m.as_dict for m in self.known_mutations]})
 
     @staticmethod
     def from_yaml(data):
@@ -37,6 +37,7 @@ class MutationRecord:
     def __init__(self):
         self.location = None
         self.original_text = None
+        self.line_number = None
         self.source_file_name = None
         self.new_text = None
         self.crime_scenes = []  # type: List[str]
@@ -46,8 +47,13 @@ class MutationRecord:
         result = MutationRecord()
         result.location = data.get("location", "")
         result.original_text = data.get("original_text", "")
+        result.line_number = data.get("line_number", "")
         result.source_file_name = data.get("source_file_name", "")
         result.new_text = data.get("new_text", "")
         result.crime_scenes = data.get("crime_scenes", [])
         return result
+
+    @property
+    def as_dict(self):
+        return self.__dict__
 
