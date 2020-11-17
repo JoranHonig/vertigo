@@ -31,7 +31,13 @@ class Mutation:
     A core class contains specific information on a single core
     """
 
-    def __init__(self, location: Tuple[int, int, int], source: SourceFile, value: str, project_directory: Path):
+    def __init__(
+            self,
+            location: Tuple[int, int, int],
+            source: SourceFile,
+            value: str,
+            project_directory: Path
+    ):
         """
         Initializes a core
         :param location: Location of the core, in the src format (offset, length, file_index)
@@ -61,6 +67,21 @@ class Mutation:
             if len(line) + cursor > offset:
                 return i, line.replace("\t", "")
             cursor += len(line)
+
+    @property
+    def source_file_name(self):
+        return self.source.file.name
+
+    @property
+    def original_value(self):
+        source_content = self.source.file.read_text('utf-8')
+        return source_content[self.location[0]: self.location[0] + self.location[1]]
+
+    @property
+    def line_number(self):
+        source_content = self.source.file.read_text('utf-8')
+        line_nr, _ = self._get_mutated_line(self.location[0], source_content)
+        return line_nr
 
     def __repr__(self) -> str:
         """ Prints information that can be used to triage a core """
