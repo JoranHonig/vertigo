@@ -11,6 +11,8 @@ from eth_vertigo.test_runner.exceptions import TestRunException
 from eth_vertigo.interfaces.truffle import Truffle
 from eth_vertigo.mutator.universal_mutator import UniversalMutator
 
+from eth_vertigo.incremental import IncrementalRecorder, IncrementalMutationStore, IncrementalSuggester
+
 from tqdm import tqdm
 
 
@@ -30,6 +32,8 @@ def cli():
 @click.option('--truffle-location', help="Location of truffle cli", nargs=1, type=str, default="truffle")
 @click.option('--sample-ratio', help="If this option is set. Vertigo will apply the sample filter with the given ratio", nargs=1, type=float)
 @click.option('--exclude', help="Vertigo won't mutate files in these directories", multiple=True)
+@click.option('--incremental', help="File where incremental mutation state is stored",
+              type=str)
 def run(
         output,
         network,
@@ -39,7 +43,8 @@ def run(
         rules,
         truffle_location,
         sample_ratio,
-        exclude
+        exclude,
+        incremental
 ):
     """ Run command """
     click.echo("[*] Starting mutation testing")
@@ -56,6 +61,18 @@ def run(
     if network and ganache_network:
         click.echo("[-] Can't use dynamic networks and regular networks simultaniously")
         exit(1)
+
+    test_suggesters = []
+    if incremental:
+        incremental_store_file = Path(incremental)
+        if not incremental_store_file.exists():
+            pass
+        elif not incremental_store_file.is_file() :
+            click.echo(f"Incremental file {incremental} is not a file")
+            exit(0)
+        else:
+            store = IncrementalMutationStore.from_file(incremental_store_file)
+            test_suggesters.append(IncrementalSuggester(store))
 
     if project_type == "truffle":
         click.echo("[*] Starting analysis on truffle project")
@@ -83,7 +100,8 @@ def run(
         elif ganache_network:
             network_pool = DynamicNetworkPool(
                 ganache_network,
-                lambda port: Ganache(port, ganache_path, [ganache_network_options])
+                lambda port: Ganache(port, ganache_network_options.split(' ') if ganache_network_options else [],
+                                     ganache_path)
             )
         else:
             click.echo("[-] Vertigo needs at least one network to run analyses on")
@@ -97,6 +115,7 @@ def run(
                 truffle_runner_factory=TruffleRunnerFactory(truffle),
                 network_pool=network_pool,
                 filters=filters,
+                suggesters=test_suggesters,
             )
         except:
             click.echo("[-] Encountered an error while setting up the core campaign")
@@ -122,7 +141,7 @@ def run(
         campaign.store_compilation_results()
         click.echo("[*] Running analysis on {} mutants".format(len(campaign.mutations)))
         with tqdm(total=len(campaign.mutations), unit="mutant") as pbar:
-            report = campaign.run(lambda: pbar.update(1) and pbar.refresh(), threads=max(len(network), 1))
+            report = campaign.run(lambda: pbar.update(1) and pbar.refresh(), threads=max(network_pool.size, 1))
         pbar.close()
 
     except TestRunException as e:
@@ -148,6 +167,14 @@ def run(
         if not output_path.exists() or click.confirm("[*] There already exists something at {}. Overwrite ".format(str(output_path))):
             click.echo("Result of core run can be found at: {}".format(output))
             output_path.write_text(report.render(with_mutations=True), "utf-8")
+
+    if incremental:
+        incremental_store_file = Path(incremental)
+        if not incremental_store_file.exists() or \
+            click.confirm(f"[*] There already exists an incremental at {incremental_store_file.name}. Overwrite "):
+            new_incremental_store = IncrementalRecorder().record(report.mutations)
+            new_incremental_store.to_file(incremental_store_file)
+
     click.echo("[*] Done! ")
 
 
