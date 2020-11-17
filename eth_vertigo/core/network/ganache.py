@@ -7,10 +7,10 @@ DEFAULT_GANACHE_PARAMETERS = []  # ["--dbMemdown"]
 
 
 class Ganache:
-    def __init__(self, port, ganache_binary="ganache", parameters=()):
+    def __init__(self, port, parameters, ganache_binary="ganache"):
         # Remove any pre-set port options
-        self.parameters = [p for p in parameters if "--port" not in p]
-        self.parameters.append(f"--port {port}")
+        self.parameters = parameters
+        self.parameters.extend(["--port", str(port)])
 
         for param in DEFAULT_GANACHE_PARAMETERS:
             if param in self.parameters:
@@ -25,9 +25,14 @@ class Ganache:
             raise ValueError("Process has already been terminated")
 
         self.process = Popen(
-            [self.ganache_binary] + [' '.join(self.parameters)],
+            [self.ganache_binary] + self.parameters,
             stderr=PIPE, stdout=PIPE
         )
+
+        while True:
+            line = self.process.stdout.readline()
+            if "Listening on" in str(line):
+                break
 
         if self.process.poll() is not None:
             raise Exception("Could not create ganache network")
