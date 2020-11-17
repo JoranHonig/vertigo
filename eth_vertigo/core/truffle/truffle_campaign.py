@@ -107,8 +107,10 @@ class TruffleCampaign(Campaign):
                     network=network,
                     original_bytecode=self.bytecodes
                 )
-                if any(map(lambda t: not t.success, test_result.values())):
+                killers = [test for test in test_result.values() if not test.success]
+                if killers:
                     mutation.result = MutationResult.KILLED
+                    mutation.crime_scenes = [killer.full_title for killer in killers]
             except EquivalentMutant:
                 mutation.result = MutationResult.EQUIVALENT
         except TimedOut:
