@@ -108,6 +108,7 @@ class TruffleCampaign(Campaign):
 
         try:
             try:
+                print("running test")
                 test_result = tr.run_tests(
                     mutation=mutation,
                     timeout=int(self.base_run_time) * 2,
@@ -131,6 +132,7 @@ class TruffleCampaign(Campaign):
                     if killers:
                         mutation.result = MutationResult.KILLED
                         mutation.crime_scenes = [killer.full_title for killer in killers]
+                print("done")
             except EquivalentMutant:
                 mutation.result = MutationResult.EQUIVALENT
         except TimedOut:
