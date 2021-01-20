@@ -3,12 +3,10 @@ from os import getcwd
 from pathlib import Path
 from eth_vertigo.core import MutationResult
 from eth_vertigo.core.network import DynamicNetworkPool, StaticNetworkPool, Ganache
-from eth_vertigo.core.truffle.truffle_campaign import TruffleCampaign
+from eth_vertigo.interfaces.truffle import TruffleCampaign
 from eth_vertigo.core.filters.sample_filter import SampleFilter
 from eth_vertigo.core.filters.exclude_filter import ExcludeFilter
-from eth_vertigo.test_runner.truffle import TruffleRunnerFactory
 from eth_vertigo.test_runner.exceptions import TestRunException
-from eth_vertigo.interfaces.truffle import Truffle
 from eth_vertigo.mutator.universal_mutator import UniversalMutator
 
 from eth_vertigo.incremental import IncrementalRecorder, IncrementalMutationStore, IncrementalSuggester
@@ -50,7 +48,6 @@ def run(
     click.echo("[*] Starting mutation testing")
 
     # Setup global parameters
-    truffle = Truffle(truffle_location)
 
     working_directory = getcwd()
     project_type = _directory_type(working_directory)
@@ -109,10 +106,9 @@ def run(
 
         try:
             campaign = TruffleCampaign(
+                location=truffle_location,
                 project_directory=project_path,
-                truffle_compiler=truffle,
                 mutators=mutators,
-                truffle_runner_factory=TruffleRunnerFactory(truffle),
                 network_pool=network_pool,
                 filters=filters,
                 suggesters=test_suggesters,

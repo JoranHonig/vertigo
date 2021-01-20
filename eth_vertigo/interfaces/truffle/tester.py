@@ -1,8 +1,20 @@
+from json import loads, JSONDecodeError
+from subprocess import Popen, TimeoutExpired
+from tempfile import TemporaryFile
+from typing import Dict, Union
+
+from eth_vertigo.interfaces.generics import Tester
+from eth_vertigo.interfaces.truffle.core import TruffleCore
+from eth_vertigo.interfaces.common import normalize_mocha
+
+from eth_vertigo.test_runner import TestResult
+from eth_vertigo.test_runner.exceptions import TestRunException, TimedOut
+
 from eth_vertigo.test_runner import Runner
 from eth_vertigo.test_runner.file_editor import FileEditor
-from eth_vertigo.test_runner.truffle.truffle_tester import TruffleTester
+from eth_vertigo.interfaces.generics import Compiler
 from eth_vertigo.test_runner.exceptions import EquivalentMutant
-from eth_vertigo.core import Mutation, MutationResult
+from eth_vertigo.core import Mutation
 from typing import Generator, List
 
 from pathlib import Path
@@ -55,15 +67,11 @@ def _apply_mutation(mutation: Mutation, working_directory):
     FileEditor.edit(target_file_name, mutation.location, mutation.value)
 
 
-class TruffleRunner(Runner):
-
-    def __init__(self, project_directory, truffle_tester: TruffleTester):
+class TruffleTester(TruffleCore, Tester):
+    def __init__(self, truffle_location, project_directory, compiler: Compiler):
         self.project_directory = project_directory
-        self.truffle_tester = truffle_tester
-
-    @property
-    def tests(self) -> Generator[str, None, None]:
-        raise NotImplementedError
+        self.compiler = compiler
+        TruffleCore.__init__(self, truffle_location)
 
     def run_tests(
             self,
@@ -78,6 +86,10 @@ class TruffleRunner(Runner):
         Runs all the tests in the truffle project in a clean environment
         :param coverage: Whether to run the tests with coverage
         :param mutation: List indicating edits that need to be performed on mutator files
+        :param timeout: Maximum duration that the test is allowed to take
+        :param network: Name of the network that the test should be using
+        :param original_bytecode: A dict of the original bytecodes (before mutation)
+        :param suggestions: a list of tests to try first, before commencing analysis with the entire test suite
         :return: Test results
         """
         if coverage:
@@ -93,23 +105,54 @@ class TruffleRunner(Runner):
             _apply_mutation(mutation, temp_dir)
         try:
             if original_bytecode is not None and original_bytecode != {}:
-                if self.truffle_tester.check_bytecodes(temp_dir, original_bytecode):
+                if self.compiler.check_bytecodes(temp_dir, original_bytecode):
                     raise EquivalentMutant
-            result = self.truffle_tester.run_test_command(temp_dir, timeout=timeout, network_name=network)
+            result = self._run_test_command(temp_dir, network_name=network, timeout=timeout)
         finally:
             _rm_temp_truffle_directory(temp_dir)
 
         return result
 
-    def run_test(self, name: str, coverage: bool = False):
-        """
-        Runs test with specific name (useless for now since truffle doesn't really support this
-        This command will run all the tests to get results!
-        :param name: Name of the test to run
-        :param coverage: Whether to run the test with coverage
-        :return: test result for the requested test
-        """
-        test_result = self.run_tests()
-        if name in test_result.keys():
-            return test_result[name]
-        return None
+    def _run_test_command(self, working_directory: str, network_name: str = None, timeout=None) -> Union[Dict[str, TestResult], None]:
+        command = [
+            self.truffle_location, 'test'
+        ]
+
+        if network_name:
+            command += ['--network', network_name]
+
+        with TemporaryFile() as stdin, TemporaryFile() as stdout:
+            stdin.seek(0)
+            proc = Popen(command, stdin=stdin, stdout=stdout, stderr=stdout, cwd=working_directory)
+            try:
+                proc.wait(timeout=timeout)
+            except TimeoutExpired:
+                proc.kill()
+                raise TimedOut
+
+            stdout.seek(0)
+            output = stdout.read()
+
+        split = output.decode('utf-8').split("\n")
+        errors = []
+        test_result = []
+        preamble = True
+        for line in split:
+            if line.startswith("Error"):
+                errors.append(line)
+            if line.startswith("{"):
+                preamble = False
+            if preamble:
+                continue
+            test_result.append(line)
+
+        test_result = "\n".join(test_result)
+
+        if errors:
+            raise TestRunException("\n".join(errors))
+        try:
+            return normalize_mocha(loads(test_result))
+        except JSONDecodeError:
+            raise TestRunException("Encountered error during test output analysis")
+
+

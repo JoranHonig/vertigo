@@ -1,18 +1,22 @@
 from eth_vertigo.mutator.mutator import Mutator
-from eth_vertigo.mutator.truffle.solidity_file import SolidityFile
+from eth_vertigo.interfaces.truffle.mutator import SolidityFile
 from eth_vertigo.mutator.solidity.solidity_mutator import SolidityMutator
-from eth_vertigo.test_runner.truffle import TruffleRunnerFactory
+
+from eth_vertigo.interfaces.truffle.tester import TruffleTester
+from eth_vertigo.interfaces.truffle.compiler import TruffleCompiler
+
 from eth_vertigo.test_runner.exceptions import EquivalentMutant
 from eth_vertigo.core import Mutation, MutationResult
 from eth_vertigo.core.campaign import Campaign
-from eth_vertigo.core.truffle.truffle_compiler import TruffleCompiler
-from eth_vertigo.test_runner.exceptions import TestRunException, TimedOut
+
 from eth_vertigo.core.network import NetworkPool
+
+from eth_vertigo.test_runner.exceptions import TestRunException, TimedOut
+
 from typing import List, Callable
 from time import time
 from pathlib import Path
 import logging
-from queue import Queue
 
 
 class TruffleCampaign(Campaign):
@@ -23,9 +27,8 @@ class TruffleCampaign(Campaign):
     """
     def __init__(
             self,
+            location: str,
             project_directory: Path,
-            truffle_compiler: TruffleCompiler,
-            truffle_runner_factory: TruffleRunnerFactory,
             mutators: List[Mutator],
             network_pool: NetworkPool,
             filters=None,
@@ -34,21 +37,21 @@ class TruffleCampaign(Campaign):
         super().__init__(filters=filters, suggesters=suggesters)
         self.project_directory = project_directory
         self.source_directory = project_directory / "build" / "contracts"
-        self.truffle_compiler = truffle_compiler
+        self.truffle_compiler = TruffleCompiler(location)
+        self.truffle_location = location
 
         self.sources = list(self._get_sources())
         self.base_run_time = None
         self.network_pool = network_pool
         self.bytecodes = {}
 
-        self.truffle_runner_factory = truffle_runner_factory
         self.mutators = mutators
         self.mutators.append(SolidityMutator())
 
     def _get_sources(self, dir=None):
         """ Implements basic mutator file discovery """
         if not (self.project_directory / "build").exists():
-            self.truffle_compiler.run_compile_command(str(self.project_directory))
+            self.truffle_compiler.run_compilation(str(self.project_directory))
 
         dir = dir or self.source_directory
         for source_file in dir.iterdir():
@@ -60,7 +63,7 @@ class TruffleCampaign(Campaign):
 
     def valid(self):
         """ Checks whether the current project is valid """
-        tr = self.truffle_runner_factory.create(str(self.project_directory))
+        tr = TruffleTester(self.truffle_location, str(self.project_directory), self.truffle_compiler)
 
         begin = time()
 
@@ -91,7 +94,7 @@ class TruffleCampaign(Campaign):
 
     def test_mutation(self, mutation: Mutation, done_callback: Callable):
         """ Run the test suite using a core and check for murders """
-        tr = self.truffle_runner_factory.create(str(self.project_directory))
+        tr = TruffleTester(str(self.project_directory))
         mutation.result = MutationResult.LIVED
 
         try:
@@ -108,7 +111,6 @@ class TruffleCampaign(Campaign):
 
         try:
             try:
-                print("running test")
                 test_result = tr.run_tests(
                     mutation=mutation,
                     timeout=int(self.base_run_time) * 2,
@@ -132,7 +134,6 @@ class TruffleCampaign(Campaign):
                     if killers:
                         mutation.result = MutationResult.KILLED
                         mutation.crime_scenes = [killer.full_title for killer in killers]
-                print("done")
             except EquivalentMutant:
                 mutation.result = MutationResult.EQUIVALENT
         except TimedOut:

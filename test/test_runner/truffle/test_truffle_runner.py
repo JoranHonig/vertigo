@@ -6,9 +6,9 @@ from unittest.mock import MagicMock
 
 from eth_vertigo.core import Mutation
 from eth_vertigo.mutator.source_file import SourceFile
-from eth_vertigo.test_runner.truffle.truffle_tester import TruffleTester
-from eth_vertigo.test_runner.truffle.truffle_runner import _make_temp_truffle_directory, _rm_temp_truffle_directory, \
-    _set_reporter, _apply_mutation, TruffleRunner
+from eth_vertigo.interfaces.truffle.compiler import TruffleCompiler
+from eth_vertigo.interfaces.truffle.tester import TruffleTester, _make_temp_truffle_directory, _rm_temp_truffle_directory, \
+    _set_reporter, _apply_mutation
 
 
 def test_mk_tmp_truffle_directory(tmp_path: Path):
@@ -74,14 +74,6 @@ def test_apply_mutation(tmp_path):
     assert "value" == file_path.read_text("utf-8")
 
 
-def test_truffle_runner_tests():
-    # Arrange
-    truffle_runner = TruffleRunner(None, None)
-
-    # Act and Assert
-    with pytest.raises(NotImplementedError):
-        truffle_runner.tests
-
 
 def test_truffle_runner_run_tests(tmp_path):
     # Arrange
@@ -89,52 +81,14 @@ def test_truffle_runner_run_tests(tmp_path):
     truffle_js.touch()
 
     expected_test_result = {"test_result": True}
-    truffle_tester = TruffleTester()
+    truffle_tester = TruffleTester(str(truffle_js), str(tmp_path), TruffleCompiler(str(truffle_js)))
     truffle_tester.run_test_command = MagicMock(return_value=expected_test_result)
 
-    truffle_runner = TruffleRunner(str(tmp_path), truffle_tester)
-
     # Act
-    test_result = truffle_runner.run_tests()
+    test_result = truffle_tester.run_tests()
 
     # Assert
     assert expected_test_result == test_result
-
-
-def test_truffle_runner_run_test(tmp_path):
-    # Arrange
-    truffle_js = tmp_path / "truffle.js"  # type: Path
-    truffle_js.touch()
-
-    expected_test_result = {"test_result": True}
-    truffle_tester = TruffleTester()
-    truffle_tester.run_test_command = MagicMock(return_value=expected_test_result)
-
-    truffle_runner = TruffleRunner(str(tmp_path), truffle_tester)
-
-    # Act
-    test_result = truffle_runner.run_test("test_result")
-
-    # Assert
-    assert test_result
-
-
-def test_truffle_runner_run_test_non_existent_test(tmp_path):
-    # Arrange
-    truffle_js = tmp_path / "truffle.js"  # type: Path
-    truffle_js.touch()
-
-    expected_test_result = {"test_result": True}
-    truffle_tester = TruffleTester()
-    truffle_tester.run_test_command = MagicMock(return_value=expected_test_result)
-
-    truffle_runner = TruffleRunner(str(tmp_path), truffle_tester)
-
-    # Act
-    test_result = truffle_runner.run_test("not existent")
-
-    # Assert
-    assert test_result is None
 
 
 def test_truffle_runner_run_coverage(tmp_path):
@@ -143,14 +97,12 @@ def test_truffle_runner_run_coverage(tmp_path):
     truffle_js.touch()
 
     expected_test_result = {"test_result": True}
-    truffle_tester = TruffleTester()
+    truffle_tester = TruffleTester(str(truffle_js), str(tmp_path), TruffleCompiler(str(truffle_js)))
     truffle_tester.run_test_command = MagicMock(return_value=expected_test_result)
-
-    truffle_runner = TruffleRunner(str(tmp_path), truffle_tester)
 
     # Act and Assert
     with pytest.raises(NotImplementedError):
-        truffle_runner.run_tests(coverage=True)
+        truffle_tester.run_tests(coverage=True)
 
 
 def test_truffle_runner_run_test_with_mutation(tmp_path):
@@ -166,13 +118,11 @@ def test_truffle_runner_run_test_with_mutation(tmp_path):
     truffle_js.touch()
 
     expected_test_result = {"test_result": True}
-    truffle_tester = TruffleTester()
+    truffle_tester = TruffleTester(str(truffle_js), str(tmp_path), TruffleCompiler(str(truffle_js)))
     truffle_tester.run_test_command = MagicMock(return_value=expected_test_result)
 
-    truffle_runner = TruffleRunner(str(tmp_path), truffle_tester)
-
     # Act
-    test_result = truffle_runner.run_tests(mutation=mutation)
+    test_result = truffle_tester.run_tests(mutation=mutation)
 
     # Assert
     assert expected_test_result == test_result
