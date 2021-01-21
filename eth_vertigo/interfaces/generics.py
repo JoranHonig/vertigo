@@ -1,6 +1,7 @@
-from typing import Dict, Union
+from typing import Dict, Union, List
 from eth_vertigo.test_runner.test_result import TestResult
 from abc import ABC, abstractmethod
+from eth_vertigo.core import Mutation
 
 
 class Compiler:
@@ -38,14 +39,14 @@ class Tester(ABC):
     """Tester interface exposes testing functionality from testing frame work"""
 
     @abstractmethod
-    def run_tests(self, working_directory: str, network_name: str = None, timeout=None) \
-            -> Union[None, Dict[str, TestResult]]:
-        """ Runs tests
-
-        :param working_directory: The directory which will be tested
-        :param network_name: Name of the network to execute the tests on
-        :param timeout: The maximum duration that the tests are allowed to take
-        :return: The test results
-        """
+    def run_tests(
+            self,
+            coverage: bool = False,
+            mutation: Mutation = None,
+            timeout=None,
+            network: str = None,
+            original_bytecode: Dict[str, str] = None,
+            suggestions: List[str] = None,
+    ) -> Union[None, Dict[str, TestResult]]:
         pass
 

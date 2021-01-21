@@ -106,7 +106,7 @@ def run(
 
         try:
             campaign = TruffleCampaign(
-                location=truffle_location,
+                truffle_location=truffle_location,
                 project_directory=project_path,
                 mutators=mutators,
                 network_pool=network_pool,
