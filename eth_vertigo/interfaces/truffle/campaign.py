@@ -94,7 +94,11 @@ class TruffleCampaign(Campaign):
 
     def test_mutation(self, mutation: Mutation, done_callback: Callable):
         """ Run the test suite using a core and check for murders """
-        tr = TruffleTester(str(self.project_directory))
+        tr = TruffleTester(
+            str(self.truffle_location),
+            str(self.project_directory),
+            TruffleCompiler(str(self.truffle_location))
+        )
         mutation.result = MutationResult.LIVED
 
         try:
