@@ -46,7 +46,7 @@ mirror_mutants = {
 def _mutate_binary_op(
     mutate_dict: dict, source_file: SolidityFile, project_directory: Path
 ):
-    interesting_locs = source_file.get_binary_op_locations()
+    interesting_locs = list(source_file.get_binary_op_locations())
 
     for original_operator, src in interesting_locs:
         if original_operator not in mutate_dict.keys():

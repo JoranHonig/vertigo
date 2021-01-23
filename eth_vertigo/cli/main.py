@@ -201,7 +201,7 @@ def _directory_type(working_directory: str):
     """ Determines the current framework in the current directory """
     wd = Path(working_directory)
     has_truffle_config = (wd / "truffle.js").exists() or (wd / "truffle-config.js").exists()
-    has_hardhat_config = (wd / "hardhat.config.js")
+    has_hardhat_config = (wd / "hardhat.config.js").exists()
     if has_truffle_config and not has_hardhat_config:
         return "truffle"
     if has_hardhat_config and not has_truffle_config:
