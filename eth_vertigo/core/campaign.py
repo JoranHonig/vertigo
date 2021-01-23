@@ -107,7 +107,7 @@ class BaseCampaign(ABC, Campaign):
 
             compiler: Compiler,
             tester: Tester,
-            source_file_builder: Callable[[Path], SourceFile],
+            source_file_builder: Callable[[Path, str], SourceFile],
 
             filters=None,
             suggesters=None

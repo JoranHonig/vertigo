@@ -15,7 +15,7 @@ class HardhatCompiler(Compiler, HardhatCore):
     def run_compilation(self, working_directory: str) -> None:
         with TemporaryFile() as stdin, TemporaryFile() as stdout:
             stdin.seek(0)
-            proc = Popen([self.hardhat_command, 'compile'], stdin=stdin, stdout=stdout, cwd=working_directory)
+            proc = Popen(self.hardhat_command + ['compile'], stdin=stdin, stdout=stdout, cwd=working_directory)
             proc.wait()
             stdout.seek(0)
             output = stdout.read()

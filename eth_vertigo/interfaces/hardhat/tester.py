@@ -26,7 +26,7 @@ def _set_include_tests(directory: str, test_names: List[str]):
 
 
 class HardhatTester(HardhatCore, MochaStdoutTester):
-    def __init__(self, hardhat_command, project_directory, compiler: Compiler):
+    def __init__(self, hardhat_command: List[str], project_directory, compiler: Compiler):
         self.project_directory = project_directory
         self.compiler = compiler
         HardhatCore.__init__(self, hardhat_command)
@@ -37,7 +37,7 @@ class HardhatTester(HardhatCore, MochaStdoutTester):
             _set_include_tests(self.project_directory, keep_test_names)
 
     def build_test_command(self, network: Optional[str]) -> List[str]:
-        result = [self.hardhat_command, 'test']
-        if network:
-            result.extend(['--network', network])
+        result = self.hardhat_command + ['test']
+        # if network:
+        #     result.extend(['--network', network])
         return result
