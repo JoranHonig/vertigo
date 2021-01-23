@@ -34,10 +34,10 @@ class TruffleTester(TruffleCore, MochaStdoutTester):
         self.compiler = compiler
         TruffleCore.__init__(self, truffle_location)
 
-    def instrument_configuration(self, keep_test_names: Optional[List[str]]):
-        _set_reporter(self.project_directory)
+    def instrument_configuration(self, working_directory, keep_test_names: Optional[List[str]]):
+        _set_reporter(working_directory)
         if keep_test_names:
-            _set_include_tests(self.project_directory, keep_test_names)
+            _set_include_tests(working_directory, keep_test_names)
 
     def build_test_command(self, network: Optional[str]) -> List[str]:
         result = [self.truffle_location, 'test']

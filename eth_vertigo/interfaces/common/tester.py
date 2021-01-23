@@ -76,7 +76,7 @@ class MochaStdoutTester(Tester):
         temp_dir = make_temp_directory(self.project_directory)
         clean_build_directory(temp_dir)
 
-        self.instrument_configuration(keep_test_names)
+        self.instrument_configuration(temp_dir, keep_test_names)
 
         if mutation:
             apply_mutation(mutation, temp_dir)
@@ -92,7 +92,7 @@ class MochaStdoutTester(Tester):
         return result
 
     @abstractmethod
-    def instrument_configuration(self, filter):
+    def instrument_configuration(self, directory, keep_test_names):
         pass
 
     @abstractmethod

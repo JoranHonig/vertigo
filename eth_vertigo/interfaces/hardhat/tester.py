@@ -31,10 +31,10 @@ class HardhatTester(HardhatCore, MochaStdoutTester):
         self.compiler = compiler
         HardhatCore.__init__(self, hardhat_command)
 
-    def instrument_configuration(self, keep_test_names: Optional[List[str]]):
-        _set_reporter(self.project_directory)
+    def instrument_configuration(self, directory, keep_test_names: Optional[List[str]]):
+        _set_reporter(directory)
         if keep_test_names:
-            _set_include_tests(self.project_directory, keep_test_names)
+            _set_include_tests(self.directory, keep_test_names)
 
     def build_test_command(self, network: Optional[str]) -> List[str]:
         result = self.hardhat_command + ['test']
