@@ -3,12 +3,11 @@ from os import getcwd
 from pathlib import Path
 from eth_vertigo.core import MutationResult
 from eth_vertigo.core.network import DynamicNetworkPool, StaticNetworkPool, Ganache
-from eth_vertigo.core.truffle.truffle_campaign import TruffleCampaign
+from eth_vertigo.interfaces.truffle import TruffleCampaign
+from eth_vertigo.interfaces.hardhat import HardhatCampaign
 from eth_vertigo.core.filters.sample_filter import SampleFilter
 from eth_vertigo.core.filters.exclude_filter import ExcludeFilter
-from eth_vertigo.test_runner.truffle import TruffleRunnerFactory
 from eth_vertigo.test_runner.exceptions import TestRunException
-from eth_vertigo.interfaces.truffle import Truffle
 from eth_vertigo.mutator.universal_mutator import UniversalMutator
 
 from eth_vertigo.incremental import IncrementalRecorder, IncrementalMutationStore, IncrementalSuggester
@@ -28,6 +27,7 @@ def cli():
 @click.option('--ganache-network', help="Dynamic networks that vertigo can use eg. (develop, 8485)",
               multiple=True, type=(str, int))
 @click.option('--ganache-network-options', help="Options to pass to dynamic ganache networks", type=str)
+@click.option('--hardhat-parallel', help="Amount of networks that hardhat should be using in parallel", type=int)
 @click.option('--rules', help="Universal Mutator style rules to use in mutation testing", multiple=True)
 @click.option('--truffle-location', help="Location of truffle cli", nargs=1, type=str, default="truffle")
 @click.option('--sample-ratio', help="If this option is set. Vertigo will apply the sample filter with the given ratio", nargs=1, type=float)
@@ -40,6 +40,7 @@ def run(
         ganache_path,
         ganache_network,
         ganache_network_options,
+        hardhat_parallel,
         rules,
         truffle_location,
         sample_ratio,
@@ -50,7 +51,6 @@ def run(
     click.echo("[*] Starting mutation testing")
 
     # Setup global parameters
-    truffle = Truffle(truffle_location)
 
     working_directory = getcwd()
     project_type = _directory_type(working_directory)
@@ -74,8 +74,8 @@ def run(
             store = IncrementalMutationStore.from_file(incremental_store_file)
             test_suggesters.append(IncrementalSuggester(store))
 
-    if project_type == "truffle":
-        click.echo("[*] Starting analysis on truffle project")
+    if project_type:
+        click.echo("[*] Starting analysis on project")
         project_path = Path(working_directory)
 
         if not (project_path / "contracts").exists():
@@ -95,7 +95,16 @@ def run(
                 um.load_rule(Path(rule_file))
             mutators.append(um)
 
-        if network:
+        network_pool = None
+        if hardhat_parallel:
+            if project_type != "hardhat":
+                click.echo("[+] Not running analysis on hardhat project, ignoring hardhat parallel option")
+            else:
+                network_pool = StaticNetworkPool(["_not_used_anywhere_"] * hardhat_parallel)
+
+        if network_pool and (network or ganache_network):
+            click.echo("[*] Both a hardhat network pool is set up and custom networks. Only using hardhat networks")
+        elif network:
             network_pool = StaticNetworkPool(network)
         elif ganache_network:
             network_pool = DynamicNetworkPool(
@@ -103,20 +112,30 @@ def run(
                 lambda port: Ganache(port, ganache_network_options.split(' ') if ganache_network_options else [],
                                      ganache_path)
             )
-        else:
+
+        if not network_pool:
             click.echo("[-] Vertigo needs at least one network to run analyses on")
             return
 
         try:
-            campaign = TruffleCampaign(
-                project_directory=project_path,
-                truffle_compiler=truffle,
-                mutators=mutators,
-                truffle_runner_factory=TruffleRunnerFactory(truffle),
-                network_pool=network_pool,
-                filters=filters,
-                suggesters=test_suggesters,
-            )
+            if project_type == "truffle":
+                campaign = TruffleCampaign(
+                    truffle_location=truffle_location,
+                    project_directory=project_path,
+                    mutators=mutators,
+                    network_pool=network_pool,
+                    filters=filters,
+                    suggesters=test_suggesters,
+                )
+            if project_type == "hardhat":
+                campaign = HardhatCampaign(
+                    hardhat_command=["npx", "hardhat"],
+                    project_directory=project_path,
+                    mutators=mutators,
+                    network_pool=network_pool,
+                    filters=filters,
+                    suggesters=test_suggesters,
+                )
         except:
             click.echo("[-] Encountered an error while setting up the core campaign")
             for node in network_pool.claimed_networks.keys():
@@ -180,5 +199,11 @@ def run(
 
 def _directory_type(working_directory: str):
     """ Determines the current framework in the current directory """
-    # jk, we only deal with truffle for now ^^'
-    return "truffle"
+    wd = Path(working_directory)
+    has_truffle_config = (wd / "truffle.js").exists() or (wd / "truffle-config.js").exists()
+    has_hardhat_config = (wd / "hardhat.config.js").exists()
+    if has_truffle_config and not has_hardhat_config:
+        return "truffle"
+    if has_hardhat_config and not has_truffle_config:
+        return "hardhat"
+    return None
