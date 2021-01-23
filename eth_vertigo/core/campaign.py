@@ -186,7 +186,7 @@ class BaseCampaign(ABC, Campaign):
                     timeout=int(self.base_run_time) * 2,
                     network=network,
                     original_bytecode=self.bytecodes,
-                    suggestions=suggestions if suggestions else None
+                    keep_test_names=suggestions if suggestions else None
                 )
                 killers = [test for test in test_result.values() if not test.success]
                 if killers:
@@ -211,6 +211,8 @@ class BaseCampaign(ABC, Campaign):
         except TestRunException as e:
             logging.warning(str(e))
             mutation.result = MutationResult.ERROR
+        except Exception as e:
+            print(e)
         finally:
             self.network_pool.yield_network(network)
             done_callback()

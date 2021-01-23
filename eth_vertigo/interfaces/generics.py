@@ -46,7 +46,7 @@ class Tester(ABC):
             timeout=None,
             network: str = None,
             original_bytecode: Dict[str, str] = None,
-            suggestions: List[str] = None,
+            keep_test_names: List[str] = None,
     ) -> Union[None, Dict[str, TestResult]]:
         pass
 
