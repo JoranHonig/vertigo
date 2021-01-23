@@ -13,9 +13,15 @@ import json
 
 class HardhatCompiler(Compiler, HardhatCore):
     def run_compilation(self, working_directory: str) -> None:
-        with TemporaryFile() as stdin, TemporaryFile() as stdout:
+        with TemporaryFile() as stdin, TemporaryFile() as stdout,  TemporaryFile() as stderr:
             stdin.seek(0)
-            proc = Popen(self.hardhat_command + ['compile'], stdin=stdin, stdout=stdout, cwd=working_directory)
+            proc = Popen(
+                self.hardhat_command + ['compile'],
+                stdin=stdin,
+                stdout=stdout,
+                stderr=stderr,
+                cwd=working_directory
+            )
             proc.wait()
             stdout.seek(0)
             output = stdout.read()
@@ -41,9 +47,20 @@ class HardhatCompiler(Compiler, HardhatCore):
         if not contracts_dir.is_dir():
             logger.error("No contracts directory found in build directory")
 
+        contract_directories = []
+
+        def explore_contracts(directory: Path):
+            for item in directory.iterdir():
+                if item.name.endswith(".sol"):
+                    contract_directories.append(item)
+                elif item.is_dir():
+                    explore_contracts(item)
+
+        explore_contracts(contracts_dir)
+
         current_bytecode = {}
 
-        for contract_dir in contracts_dir.iterdir():
+        for contract_dir in contract_directories:
             for contract in [c for c in contract_dir.iterdir() if "dbg.json" not in c.name]:
                 try:
                     contract_compilation_result = json.loads(contract.read_text('utf-8'))

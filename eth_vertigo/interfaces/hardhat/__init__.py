@@ -43,8 +43,19 @@ class HardhatCampaign(BaseCampaign):
         if not contracts_dir.exists():
             self.compiler.run_compilation(str(self.project_directory))
 
-        for contract_dir in contracts_dir.iterdir():
+        contract_directories = []
+        def explore_contracts(directory: Path):
+            for item in directory.iterdir():
+                if item.name.endswith(".sol"):
+                    contract_directories.append(item)
+                elif item.is_dir():
+                    explore_contracts(item)
+
+        explore_contracts(contracts_dir)
+
+        for contract_dir in contract_directories:
             for contract in [c for c in contract_dir.iterdir() if "dbg.json" not in c.name]:
+
                 dbg_json = contract_dir / contract.name.replace('.json', '.dbg.json')
 
                 contract = loads(contract.read_text("utf-8"))
