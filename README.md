@@ -22,24 +22,45 @@ Depending on your environment it might be required to specify the location of th
 vertigo run --network development --truffle-location <node_dir>/bin/truffle 
 ```
 
+Or, if you're using Hardhat, just use dynamic networks:
+```bash
+vertigo run --hardhat-parallel 8
+```
+
 There are a few additional parameters available that allow you to tweak the execution of vertigo:
 ```bash
-$ python vertigo.py run --help
-Usage: vertigo.py run [OPTIONS]
+$ vertigo run --help                                                                                                                                                                  
+Usage: vertigo run [OPTIONS]
 
   Performs a core test campaign
 
 Options:
-  --output TEXT            Output core test results to file
-  --network TEXT           Network names that vertigo can use
-  --rules TEXT             Universal Mutator style rules to use in mutation
-                           testing
-  --truffle-location TEXT  Location of truffle cli
-  --sample-ratio FLOAT     If this option is set. Vertigo will apply the
-                           sample filter with the given ratio
-  --exclude TEXT           Vertigo won't mutate files in these directories
-  --help                   Show this message and exit.
-                                                                  
+  --output TEXT                   Output core test results to file
+  --network TEXT                  Network names that vertigo can use
+  --ganache-path TEXT             Path to ganache binary
+  --ganache-network <TEXT INTEGER>...
+                                  Dynamic networks that vertigo can use eg.
+                                  (develop, 8485)
+
+  --ganache-network-options TEXT  Options to pass to dynamic ganache networks
+  --hardhat-parallel INTEGER      Amount of networks that hardhat should be
+                                  using in parallel
+
+  --rules TEXT                    Universal Mutator style rules to use in
+                                  mutation testing
+
+  --truffle-location TEXT         Location of truffle cli
+  --sample-ratio FLOAT            If this option is set. Vertigo will apply
+                                  the sample filter with the given ratio
+
+  --exclude TEXT                  Vertigo won't mutate files in these
+                                  directories
+
+  --incremental TEXT              File where incremental mutation state is
+                                  stored
+
+  --help                          Show this message and exit.
+                                                                                                                                     
 ```
 
 ### Known Issues
