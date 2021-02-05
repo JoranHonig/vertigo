@@ -138,7 +138,11 @@ def run(
                 )
         except:
             click.echo("[-] Encountered an error while setting up the core campaign")
-            for node in network_pool.claimed_networks.keys():
+            if isinstance(network_pool, DynamicNetworkPool):
+                networks = network_pool.claimed_networks.keys()
+            else:
+                networks = network_pool.claimed_networks[:]
+            for node in networks:
                 click.echo(f"[+] Cleaning up network: {node}")
                 network_pool.yield_network(node)
             raise
