@@ -74,17 +74,16 @@ def run(
             store = IncrementalMutationStore.from_file(incremental_store_file)
             test_suggesters.append(IncrementalSuggester(store))
 
-    if project_type:
-        click.echo("[*] Starting analysis on project")
-        project_path = Path(working_directory)
+    click.echo("[*] Starting analysis on project")
+    project_path = Path(working_directory)
 
+    if project_type == "truffle":
         if not (project_path / "contracts").exists():
-            click.echo("[-] No contracts directory in truffle project")
-            return
+            click.echo("[-] No contracts directory in project")
         elif not (project_path / "test").exists():
-            click.echo("[-] No test directory found in truffle project")
-            return
+            click.echo("[-] No test directory found in project")
 
+    if project_type:
         if sample_ratio:
             filters.append(SampleFilter(sample_ratio))
 
