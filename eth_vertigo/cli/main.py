@@ -3,6 +3,8 @@ from os import getcwd
 from pathlib import Path
 from eth_vertigo.core import MutationResult
 from eth_vertigo.core.network import DynamicNetworkPool, StaticNetworkPool, Ganache
+from eth_vertigo.interfaces import foundry
+from eth_vertigo.interfaces.foundry import FoundryCampaign
 from eth_vertigo.interfaces.truffle import TruffleCampaign
 from eth_vertigo.interfaces.hardhat import HardhatCampaign
 from eth_vertigo.core.filters.sample_filter import SampleFilter
@@ -135,6 +137,16 @@ def run(
                     filters=filters,
                     suggesters=test_suggesters,
                 )
+
+            if project_type == "foundry":
+                campaign = FoundryCampaign(
+                    foundry_command=["forge"],
+                    project_directory=project_path,
+                    mutators=mutators,
+                    network_pool=network_pool,
+                    filters=filters,
+                    suggesters=test_suggesters,
+                )
         except:
             click.echo("[-] Encountered an error while setting up the core campaign")
             if isinstance(network_pool, DynamicNetworkPool):
@@ -205,8 +217,12 @@ def _directory_type(working_directory: str):
     wd = Path(working_directory)
     has_truffle_config = (wd / "truffle.js").exists() or (wd / "truffle-config.js").exists()
     has_hardhat_config = (wd / "hardhat.config.js").exists()
+    has_foundry_config = (wd / "foundry.toml").exists()
+    
     if has_truffle_config and not has_hardhat_config:
         return "truffle"
     if has_hardhat_config and not has_truffle_config:
         return "hardhat"
+    if has_foundry_config:
+        return "foundry"
     return None

@@ -19,6 +19,24 @@ from eth_vertigo.test_runner.exceptions import EquivalentMutant
 
 from typing import List, Dict, Union
 
+def normalize_foundry(result) -> Dict[str, TestResult]:
+    tests = {}
+    if 'Failing tests' in result:
+        results = loads(result[:result.index('Failing tests')])
+    else:
+        results = loads(result)
+
+    for _tests in results:
+        filename = _tests.split(":")[1]
+        for test in results[_tests]["test_results"]:
+            name = test.split("(")[0]
+            result = results[_tests]["test_results"][test]
+            if result["success"]:
+                tests[f"{filename} {name}"] = TestResult(name, f"{filename} {name}", 0, True)
+            else:
+                tests[f"{filename} {name}"] = TestResult(name, f"{filename} {name}", 0, False)
+
+    return tests
 
 def normalize_mocha(mocha_json: dict) -> Dict[str, TestResult]:
     tests = {}
@@ -131,10 +149,12 @@ class MochaStdoutTester(Tester):
             test_result.append(line)
 
         test_result = "\n".join(test_result)
-
         if errors:
             raise TestRunException("\n".join(errors))
         try:
-            return normalize_mocha(loads(test_result))
+            if "failures" in test_result:
+                return normalize_mocha(loads(test_result))
+            else:
+                return normalize_foundry(test_result)
         except JSONDecodeError:
             raise TestRunException("Encountered error during test output analysis")
