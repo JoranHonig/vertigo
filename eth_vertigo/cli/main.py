@@ -1,4 +1,5 @@
 import click
+import yaml
 from os import getcwd
 from pathlib import Path
 from eth_vertigo.core import MutationResult
@@ -34,6 +35,8 @@ def cli():
 @click.option('--exclude', help="Vertigo won't mutate files in these directories", multiple=True)
 @click.option('--incremental', help="File where incremental mutation state is stored",
               type=str)
+@click.option('--config', help="Pulls CLI parameters from .yml file. (requires file name)", nargs=1, type=str)
+
 def run(
         output,
         network,
