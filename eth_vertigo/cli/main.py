@@ -48,7 +48,8 @@ def run(
         truffle_location,
         sample_ratio,
         exclude,
-        incremental
+        incremental,
+        config
 ):
     """ Run command """
     click.echo("[*] Starting mutation testing")
@@ -58,6 +59,7 @@ def run(
     working_directory = getcwd()
     project_type = _directory_type(working_directory)
     filters = []
+
     if exclude:
         filters.append(ExcludeFilter(exclude))
 
@@ -76,6 +78,15 @@ def run(
         else:
             store = IncrementalMutationStore.from_file(incremental_store_file)
             test_suggesters.append(IncrementalSuggester(store))
+   
+   # Grab passed in value or look for dfault {pwd}/vertigo_config.yml
+    config_file_path = ""
+    if config:
+        config_file_path = config
+    else:
+        config_file_path = working_directory + "/vertigo_config.yml"
+
+    click.echo(f" --- config_file_path: {config_file_path}")
 
     click.echo("[*] Starting analysis on project")
     project_path = Path(working_directory)
