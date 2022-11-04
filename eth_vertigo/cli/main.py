@@ -33,8 +33,7 @@ def cli():
 @click.option('--truffle-location', help="Location of truffle cli", nargs=1, type=str, default="truffle")
 @click.option('--sample-ratio', help="If this option is set. Vertigo will apply the sample filter with the given ratio", nargs=1, type=float)
 @click.option('--exclude', help="Vertigo won't mutate files in these directories", multiple=True)
-@click.option('--incremental', help="File where incremental mutation state is stored",
-              type=str)
+@click.option('--incremental', help="File where incremental mutation state is stored",type=str)
 @click.option('--config', help="Pulls CLI parameters from .yml file. (requires file name)", nargs=1, type=str)
 
 def run(
@@ -59,6 +58,7 @@ def run(
     working_directory = getcwd()
     project_type = _directory_type(working_directory)
     filters = []
+    config_hardhat_parallel = ""
 
     if exclude:
         filters.append(ExcludeFilter(exclude))
@@ -78,15 +78,14 @@ def run(
         else:
             store = IncrementalMutationStore.from_file(incremental_store_file)
             test_suggesters.append(IncrementalSuggester(store))
-   
-   # Grab passed in value or look for dfault {pwd}/vertigo_config.yml
-    config_file_path = ""
-    if config:
-        config_file_path = config
-    else:
-        config_file_path = working_directory + "/vertigo_config.yml"
 
-    click.echo(f" --- config_file_path: {config_file_path}")
+    if config:
+        with open(config, 'r') as file:
+            config_params = yaml.safe_load(file)
+
+        click.echo(f" --- hardhat_parallel: {config_params['hardhat_parallel']}")
+        config_hardhat_parallel = config_params['hardhat_parallel']
+
 
     click.echo("[*] Starting analysis on project")
     project_path = Path(working_directory)
@@ -109,11 +108,13 @@ def run(
             mutators.append(um)
 
         network_pool = None
-        if hardhat_parallel:
+        if hardhat_parallel or config_hardhat_parallel == 8:
             if project_type != "hardhat":
                 click.echo("[+] Not running analysis on hardhat project, ignoring hardhat parallel option")
-            else:
+            elif config_hardhat_parallel == "":
                 network_pool = StaticNetworkPool(["_not_used_anywhere_"] * hardhat_parallel)
+            else:
+                network_pool = StaticNetworkPool(["_not_used_anywhere_"] * config_hardhat_parallel)
 
         if network_pool and (network or ganache_network):
             click.echo("[*] Both a hardhat network pool is set up and custom networks. Only using hardhat networks")
