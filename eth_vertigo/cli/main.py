@@ -58,8 +58,7 @@ def run(
     working_directory = getcwd()
     project_type = _directory_type(working_directory)
     filters = []
-    config_hardhat_parallel = ""
-    config_output = ""
+    #config_hardhat_parallel = ""
 
     if exclude:
         filters.append(ExcludeFilter(exclude))
@@ -84,9 +83,8 @@ def run(
         with open(config, 'r') as file:
             config_params = yaml.safe_load(file)
 
-        #click.echo(f" --- hardhat_parallel: {config_params['hardhat_parallel']}")
-        config_hardhat_parallel = config_params['hardhat_parallel']
-        config_output = config_params['output']
+        output = config_params['output']
+        hardhat_parallel = config_params['hardhat_parallel']
 
     click.echo("[*] Starting analysis on project")
     project_path = Path(working_directory)
@@ -109,13 +107,11 @@ def run(
             mutators.append(um)
 
         network_pool = None
-        if hardhat_parallel or config_hardhat_parallel == 8:
+        if hardhat_parallel:
             if project_type != "hardhat":
                 click.echo("[+] Not running analysis on hardhat project, ignoring hardhat parallel option")
-            elif config_hardhat_parallel == "":
-                network_pool = StaticNetworkPool(["_not_used_anywhere_"] * hardhat_parallel)
             else:
-                network_pool = StaticNetworkPool(["_not_used_anywhere_"] * config_hardhat_parallel)
+                network_pool = StaticNetworkPool(["_not_used_anywhere_"] * hardhat_parallel)
 
         if network_pool and (network or ganache_network):
             click.echo("[*] Both a hardhat network pool is set up and custom networks. Only using hardhat networks")
@@ -199,20 +195,13 @@ def run(
     for mutation in report.mutations:
         if mutation.result == MutationResult.LIVED:
             click.echo(str(mutation))
-##
+
     if output:
         output_path = Path(output)
         if not output_path.exists() or click.confirm("[*] There already exists something at {}. Overwrite ".format(str(output_path))):
             click.echo("Result of core run can be found at: {}".format(output))
             output_path.write_text(report.render(with_mutations=True), "utf-8")
 
-    if config_output:
-        output_path = Path(config_output)
-        if not output_path.exists() or click.confirm("[*] There already exists something at {}. Overwrite ".format(str(output_path))):
-            click.echo("Result of core run can be found at: {}".format(config_output))
-            output_path.write_text(report.render(with_mutations=True), "utf-8")
-
-    ##
     if incremental:
         incremental_store_file = Path(incremental)
         if not incremental_store_file.exists() or \
