@@ -58,7 +58,6 @@ def run(
     working_directory = getcwd()
     project_type = _directory_type(working_directory)
     filters = []
-    #config_hardhat_parallel = ""
 
     if exclude:
         filters.append(ExcludeFilter(exclude))
