@@ -1,4 +1,5 @@
 import click
+import yaml
 from os import getcwd
 from pathlib import Path
 from eth_vertigo.core import MutationResult
@@ -32,8 +33,9 @@ def cli():
 @click.option('--truffle-location', help="Location of truffle cli", nargs=1, type=str, default="truffle")
 @click.option('--sample-ratio', help="If this option is set. Vertigo will apply the sample filter with the given ratio", nargs=1, type=float)
 @click.option('--exclude', help="Vertigo won't mutate files in these directories", multiple=True)
-@click.option('--incremental', help="File where incremental mutation state is stored",
-              type=str)
+@click.option('--incremental', help="File where incremental mutation state is stored",type=str)
+@click.option('--config', help="Pulls CLI parameters from .yml file. (requires file name)", nargs=1, type=str)
+
 def run(
         output,
         network,
@@ -45,7 +47,8 @@ def run(
         truffle_location,
         sample_ratio,
         exclude,
-        incremental
+        incremental,
+        config
 ):
     """ Run command """
     click.echo("[*] Starting mutation testing")
@@ -55,6 +58,8 @@ def run(
     working_directory = getcwd()
     project_type = _directory_type(working_directory)
     filters = []
+    #config_hardhat_parallel = ""
+
     if exclude:
         filters.append(ExcludeFilter(exclude))
 
@@ -73,6 +78,13 @@ def run(
         else:
             store = IncrementalMutationStore.from_file(incremental_store_file)
             test_suggesters.append(IncrementalSuggester(store))
+
+    if config:
+        with open(config, 'r') as file:
+            config_params = yaml.safe_load(file)
+
+        output = config_params['output']
+        hardhat_parallel = config_params['hardhat_parallel']
 
     click.echo("[*] Starting analysis on project")
     project_path = Path(working_directory)

@@ -59,9 +59,28 @@ Options:
   --incremental TEXT              File where incremental mutation state is
                                   stored
 
+  --config TEXT                   File to parse vertigo options from
   --help                          Show this message and exit.
                                                                                                                                      
 ```
+
+### Using Configuration File
+
+At this time a limited set of options have been implemented. 
+
+A user can create a config file in the project root (see sample below) to limit the number of command line parameters used.
+```bash
+vertigo run --config vertigo_config.yml
+```
+
+Sample config file:
+```
+//vertigo_config.yml
+hardhat_parallel: 8
+output: output.txt
+```
+
+Note that unused fields in the config file should be `false`.
 
 ### Known Issues
 
