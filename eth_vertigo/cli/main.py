@@ -179,8 +179,7 @@ def run(
         campaign.setup()
         click.echo("[*] Checking validity of project")
         if not campaign.valid():
-            #TODO: this shouldn't be hardcoded to truffle
-            click.echo("[-] We couldn't get valid results by running the truffle tests.\n Aborting")
+            click.echo("[-] We couldn't get valid results by running the tests.\n Aborting")
             return
 
         click.echo("[+] The project is valid")

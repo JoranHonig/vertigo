@@ -42,19 +42,24 @@ class FoundryCompiler(Compiler, FoundryCore):
         if not (w_dir / "out").is_dir():
             logger.error("Compilation did not create build directory")
 
-        # TODO: Hardcode for one contract
         # Foundry doesn't separate "src" compiled outputs from the rest of the
         # test environment like truffle and hardhat do. We need to iterate on the 
         # src/ directory to get the names of the "actual"
-        contracts_dir = w_dir / "out" / "Counter.sol"
+        
+        # TODO: someone might change the name `src` and break this tool, so we
+        # should probably make this configurable
+        contracts_dir = w_dir / "out"
         if not contracts_dir.is_dir():
-            logger.error("No contracts directory found in build directory")
+            logger.error("No contracts directory found in src directory")
 
         contract_directories = []
 
+        # directory is the out/ directory
+        # src_files is the list of files in the src directory
         def explore_contracts(directory: Path):
+            src_files = [f.name for f in (w_dir / "src").iterdir() if f.is_file()]
             for item in directory.iterdir():
-                if item.name == "Counter.sol"  and item.name.endswith(".sol"):
+                if item.name in src_files and item.name.endswith(".sol"):
                     contract_directories.append(item)
                 elif item.is_dir():
                     explore_contracts(item)
@@ -64,14 +69,16 @@ class FoundryCompiler(Compiler, FoundryCore):
         current_bytecode = {}
 
         for contract_dir in contract_directories:
-            for contract in [c for c in contract_dir.iterdir() if "dbg.json" not in c.name]:
+            break
+            #TODO: Equivalence testing is currently broken and needs to be debugged.
+            for contract in [c for c in contract_dir.iterdir()]:
                 try:
-                    contract_compilation_result = json.loads(contract.read_text('utf-8'))
+                    contract_compilation_result = json.loads(contract.read_text('utf-8'))["bytecode"]["object"]
                 except json.JSONDecodeError:
                     logger.warning(f"Could not read compilation result for {contract.name}")
                     continue
 
-                current_bytecode[contract_compilation_result["contractName"]] = \
-                    strip_metadata(contract_compilation_result["bytecode"])
+                current_bytecode[contract] = \
+                    strip_metadata(contract_compilation_result)
 
         return current_bytecode

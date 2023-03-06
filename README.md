@@ -3,6 +3,8 @@
 ## Introduction
 This repo is currently a WIP. It is a fork of Joran Honig's [vertigo](https://github.com/JoranHonig/vertigo) with support for foundry added.
 
+It strongly depends on contracts being in `src` and having the same file in `test`. Added flexibility is a work in progress.
+
 A python package will be created after this build is stabilized. For now, you can test it by cloning it and running it in the foundry project you are doing mutation testing on. Command line options are the same as the original repo. You do not need to specify if you are in a foundry project, the presence of a `foundry.toml` file will signify to this tool that you are in a foundry repo. If you have configuration files for truffle or hardhat in your project, this tool might not work. You can temporarily change their names.
 
 ```bash
