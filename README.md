@@ -1,85 +1,23 @@
-# vertigo
-[![Build Status](https://travis-ci.org/JoranHonig/vertigo.svg?branch=master)](https://travis-ci.org/JoranHonig/vertigo)
-[![Gitter](https://badges.gitter.im/eth-vertigo/community.svg)](https://gitter.im/eth-vertigo/community?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge)
+# vertigo-rs
 
-Vertigo is a mutation testing framework designed to work specifically for smart contracts.
-This mutation testing framework implements a range of mutation operators that are either selected from previous works or tailored to solidity.
+## Introduction
+This repo is currently a WIP. It is a fork of Joran Honig's [vertigo](https://github.com/JoranHonig/vertigo) with support for foundry added.
 
-### Quick Start Guide
-
-To install vertigo, execute the following command:
-```bash
-pip3 install --user eth-vertigo
-```
-
-You can now run vertigo on a truffle project with the following command (assuming you have a `development` network configured in your`truffle-config.js`):
+A python package will be created after this build is stabilized. For now, you can test it by cloning it and running it in the foundry project you are doing mutation testing on. Command line options are the same as the original repo. You do not need to specify if you are in a foundry project, the presence of a `foundry.toml` file will signify to this tool that you are in a foundry repo. If you have configuration files for truffle or hardhat in your project, this tool might not work. You can temporarily change their names.
 
 ```bash
-vertigo run --network development
-```
-Depending on your environment it might be required to specify the location of the truffle executable:
-```bash
-vertigo run --network development --truffle-location <node_dir>/bin/truffle 
-```
+git clone https://github.com/RareSkills/vertigo-rs
+python setup.py
 
-Or, if you're using Hardhat, just use dynamic networks:
-```bash
-vertigo run --hardhat-parallel 8
+cd <your foundry repo>
+
+python <path-to-this-project>/vertigo-rs/vertigo.py run --output results.txt
 ```
 
-There are a few additional parameters available that allow you to tweak the execution of vertigo:
-```bash
-$ vertigo run --help                                                                                                                                                                  
-Usage: vertigo run [OPTIONS]
+## Maintainers
+Jeffrey Scholz [RareSkills](https://www.rareskills.io)
 
-  Performs a core test campaign
-
-Options:
-  --output TEXT                   Output core test results to file
-  --network TEXT                  Network names that vertigo can use
-  --ganache-path TEXT             Path to ganache binary
-  --ganache-network <TEXT INTEGER>...
-                                  Dynamic networks that vertigo can use eg.
-                                  (develop, 8485)
-
-  --ganache-network-options TEXT  Options to pass to dynamic ganache networks
-  --hardhat-parallel INTEGER      Amount of networks that hardhat should be
-                                  using in parallel
-
-  --rules TEXT                    Universal Mutator style rules to use in
-                                  mutation testing
-
-  --truffle-location TEXT         Location of truffle cli
-  --sample-ratio FLOAT            If this option is set. Vertigo will apply
-                                  the sample filter with the given ratio
-
-  --exclude TEXT                  Vertigo won't mutate files in these
-                                  directories
-
-  --incremental TEXT              File where incremental mutation state is
-                                  stored
-
-  --help                          Show this message and exit.
-                                                                                                                                     
-```
-
-### Known Issues
-
-**Ganache** is generally used only for a single run of the entire test suite. 
-For the general use case, it does not matter if Ganache creates a few thousand files.
-Unfortunately, once you start executing the entire test suite hundreds of times, you can end up with millions of files, and your machine could run out of free inode's.
-You can check whether this happens to you by running:
-```
-df -i
-```
-
-This issue ([#1](https://github.com/JoranHonig/vertigo/issues/1)) is known, and we're working on a fix.
- 
-In the meanwhile. If your test suite is large enough to munch all your inodes, then there are two options:
- - You can use the command line option `--sample-ratio` to select a random subsample of the mutations (reducing the number of times that the test suite is run)
- - You can create a partition that has a sufficient amount of inodes available
-
-### Publications and Articles
+## Publications and Articles
 [Practical Mutation Testing for Smart Contracts](https://link.springer.com/chapter/10.1007/978-3-030-31500-9_19) - Joran J. Honig, Maarten H. Everts, Marieke Huisman
 
 [Introduction into Mutation Testing](https://medium.com/swlh/introduction-into-mutation-testing-d6512dc702b0?source=friends_link&sk=2878e0c08b6301a125198a264e43edb4) - Joran Honig

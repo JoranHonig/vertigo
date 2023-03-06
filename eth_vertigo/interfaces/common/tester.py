@@ -19,14 +19,28 @@ from eth_vertigo.test_runner.exceptions import EquivalentMutant
 
 from typing import List, Dict, Union
 
-
 def normalize_mocha(mocha_json: dict) -> Dict[str, TestResult]:
+ 
     tests = {}
-    for failure in mocha_json["failures"]:
-        tests[failure["fullTitle"]] = TestResult(failure["title"], failure["fullTitle"], failure["duration"], False)
-    for success in mocha_json["passes"]:
-        tests[success["fullTitle"]] = TestResult(success["title"], success["fullTitle"], success["duration"], True)
-    return tests
+    # it really is mocha
+    if "tests" in mocha_json:
+        for failure in mocha_json["failures"]:
+            tests[failure["fullTitle"]] = TestResult(failure["title"], failure["fullTitle"], failure["duration"], False)
+        for success in mocha_json["passes"]:
+            tests[success["fullTitle"]] = TestResult(success["title"], success["fullTitle"], success["duration"], True)
+        return tests
+ 
+    # it is foundry
+    else:
+        for test_name in mocha_json["test/Counter.t.sol:CounterTest"]["test_results"].keys():
+            # title: testIncrement(), test_name
+            # fullTitle: testIncrement(), test_name
+            # duration: 0
+            if mocha_json["test/Counter.t.sol:CounterTest"]["test_results"][test_name]["success"] == True:
+                tests[test_name] = TestResult(test_name, test_name, 0, True)
+            else:
+                tests[test_name] = TestResult(test_name, test_name, 0, False)
+        return tests
 
 
 def make_temp_directory(original_dir: str):
@@ -109,7 +123,8 @@ class MochaStdoutTester(Tester):
             stdin.seek(0)
             proc = Popen(command, stdin=stdin, stdout=stdout, stderr=stdout, cwd=working_directory)
             try:
-                proc.wait(timeout=timeout)
+                #TODO: timeout defaults to zero for some reason
+                proc.wait(timeout=1000000)
             except TimeoutExpired:
                 proc.kill()
                 raise TimedOut
