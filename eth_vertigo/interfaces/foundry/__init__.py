@@ -4,6 +4,8 @@ from eth_vertigo.mutator.mutator import Mutator
 from pathlib import Path
 from eth_vertigo.core.network import NetworkPool
 from json import loads
+import glob
+import os
 
 
 class FoundryCampaign(BaseCampaign):
@@ -39,15 +41,19 @@ class FoundryCampaign(BaseCampaign):
 
     def _get_sources(self):
         """ Implements basic mutator file discovery """
-        contracts_dir = self.project_directory / "out" #/ "contracts"
+        contracts_dir = self.project_directory / "out"
         if not contracts_dir.exists():
             self.compiler.run_compilation(str(self.project_directory))
+
+        # TODO: This might not be the most reliable way to find the source files
+        #       but it works for now. Glob the source directory, then find the set intersection
+        #       between the files in src and the files in the out directory
+        src_file_names = set(map(os.path.basename, glob.glob('src/**/*.sol', recursive=True)))
 
         contract_directories = []
         def explore_contracts(directory: Path):
             for item in directory.iterdir():
-                # TODO: Hardcode for now because foundry compiles too many files in the out/ directory
-                if item.name == "Counter.sol" and item.name.endswith(".sol"):
+                if item.name in src_file_names and item.name.endswith(".sol"):
                     contract_directories.append(item)
                 elif item.is_dir():
                     explore_contracts(item)
