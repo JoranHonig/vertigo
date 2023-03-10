@@ -69,6 +69,7 @@ Options:
 For the general use case, it does not matter if Ganache creates a few thousand files.
 Unfortunately, once you start executing the entire test suite hundreds of times, you can end up with millions of files, and your machine could run out of free inode's.
 You can check whether this happens to you by running:
+
 ```
 df -i
 ```
@@ -78,6 +79,30 @@ This issue ([#1](https://github.com/JoranHonig/vertigo/issues/1)) is known, and 
 In the meanwhile. If your test suite is large enough to munch all your inodes, then there are two options:
  - You can use the command line option `--sample-ratio` to select a random subsample of the mutations (reducing the number of times that the test suite is run)
  - You can create a partition that has a sufficient amount of inodes available
+
+### Errors you could run into
+After installing Vertigo like this: `> pip3 install eth-vertigo`
+Running `vertigo` could throw an error like this:
+
+```bash
+> vertigo
+zsh: command not found: vertigo
+```
+
+When you install vertigo with pip3 it tells you the path where it gets installed for example:
+`/some/path/.local/lib/python3.9/site-packages/`
+Look in the output, on the command line, from the installation.
+
+Then, the vertigo binary file (which we thought would execute natively) is located here:
+`/some/path/.local/bin/vertigo`
+So, to make this work, please add the bin/ path to your PATH variable like this:
+`> export PATH="${PATH}:/some/path/.local/bin/"`
+
+#### Using Hardhat
+- `Could not find supported project directory in`
+- Fix => Rename your hardhat.config.ts to .js
+- `Encountered an error while running the framework's test command: Encountered error during test output analysis`
+- Fix => Comment out or remove Hardhat plugins that are outputting something on the stdout, for example `require("hardhat-gas-reporter");`
 
 ### Publications and Articles
 [Practical Mutation Testing for Smart Contracts](https://link.springer.com/chapter/10.1007/978-3-030-31500-9_19) - Joran J. Honig, Maarten H. Everts, Marieke Huisman
