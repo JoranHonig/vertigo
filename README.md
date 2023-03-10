@@ -9,7 +9,7 @@ A python package will be created after this build is stabilized. For now, you ca
 
 ```bash
 git clone https://github.com/RareSkills/vertigo-rs
-python setup.py
+python setup.py develop
 
 cd <your foundry repo>
 
