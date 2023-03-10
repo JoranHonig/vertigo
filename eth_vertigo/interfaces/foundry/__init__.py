@@ -6,11 +6,14 @@ from eth_vertigo.core.network import NetworkPool
 from json import loads
 import glob
 import os
+import re
 
 
 class FoundryCampaign(BaseCampaign):
     def __init__(
             self,
+            src_dir: str,
+            exclude_regex: str,
             foundry_command: List[str],
             project_directory: Path,
             mutators: List[Mutator],
@@ -22,6 +25,8 @@ class FoundryCampaign(BaseCampaign):
         from eth_vertigo.interfaces.foundry.compile import FoundryCompiler
         from eth_vertigo.interfaces.foundry.mutator import FoundrySourceFile
 
+        self.src_dir = src_dir
+        self.exclude_regex = exclude_regex
         compiler = FoundryCompiler(foundry_command)
         tester = FoundryTester(foundry_command, str(project_directory), compiler)
         source_file_builder = lambda ast, full_path: FoundrySourceFile(ast, full_path)
@@ -47,8 +52,12 @@ class FoundryCampaign(BaseCampaign):
         # TODO: This might not be the most reliable way to find the source files
         #       but it works for now. Glob the source directory, then find the set intersection
         #       between the files in src and the files in the out directory
-        full_names = glob.glob('src/**/*.sol', recursive=True) 
-        full_names = set(filter(lambda name: not '.t.sol' in name and 'test' not in name, full_names))
+        if str(self.src_dir).endswith('/'):
+            self.src_dir = self.src_dir[:-1]
+        full_names = glob.glob(self.src_dir + '/**/*.sol', recursive=True) 
+        exclude_object = re.compile(self.exclude_regex)
+
+        full_names = set(filter(lambda name: not exclude_object.search(name), full_names))
         src_file_names = set(map(os.path.basename, full_names))
         contract_directories = []
         def explore_contracts(directory: Path):

@@ -28,6 +28,8 @@ def cli():
 
 
 @cli.command(help="Performs a core test campaign")
+@click.option('--src-dir', help="Output core test results to file", nargs=1, type=str, default="src")
+@click.option('--exclude-regex', help="Output core test results to file", nargs=1, type=str, default="(test|Test|mock|Mock|\.t\.sol)")
 @click.option('--output', help="Output core test results to file", nargs=1, type=str)
 @click.option('--network', help="Network names that vertigo can use", multiple=True)
 @click.option('--ganache-path', help="Path to ganache binary", type=str, default="ganache-cli")
@@ -42,6 +44,8 @@ def cli():
 @click.option('--incremental', help="File where incremental mutation state is stored",
               type=str)
 def run(
+        src_dir,
+        exclude_regex,
         output,
         network,
         ganache_path,
@@ -152,6 +156,8 @@ def run(
                 )
             if project_type == "foundry":
                 campaign = FoundryCampaign(
+                    src_dir=src_dir,
+                    exclude_regex=exclude_regex,
                     foundry_command=["forge"],
                     project_directory=project_path,
                     mutators=mutators,

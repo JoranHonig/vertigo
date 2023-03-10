@@ -13,8 +13,32 @@ python setup.py develop
 
 cd <your foundry repo>
 
-python <path-to-this-project>/vertigo-rs/vertigo.py run --output results.txt
+python <path-to-this-project>/vertigo-rs/vertigo.py run
 ```
+
+## cli arguments
+```
+--src-dir <contracts-directory>
+```
+Changing the source directory. This is usually `src/` by default in foundry, but if you have a different name like `contracts` you can specify it with --src-dir. Default is `src/`
+
+```
+--exclude-regex <regex>
+```
+Don't test files in `--src-dir` that match this regex. This is useful if you have mocks or tests in a subdirectory of `src/`
+
+```
+--sample-ratio <float [0-1]>
+```
+Don't run every mutation, but run a percentage of them. Useful if you are just checking if everything works end-to-end
+
+```
+--output <file>
+```
+Save output to a file instead of stdout. Some terminals don't show the output, so use this option if you don't see an output. Recommended to use generally. Defaults to stdout.
+
+Please see the original [readme](https://github.com/JoranHonig/vertigo/blob/master/README.md) for the other options, or use the `--help` option to see the rest.
+
 
 ## Maintainers
 Jeffrey Scholz [RareSkills](https://www.rareskills.io)
