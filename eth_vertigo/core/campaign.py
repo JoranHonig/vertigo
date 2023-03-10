@@ -113,7 +113,6 @@ class BaseCampaign(ABC, Campaign):
             suggesters=None
     ):
         super().__init__(filters=filters, suggesters=suggesters)
-
         self.project_directory = project_directory
         self.source_directory = project_directory / "build" / "contracts"
 

@@ -59,7 +59,7 @@ class FoundryCompiler(Compiler, FoundryCore):
         def explore_contracts(directory: Path):
             src_files = [f.name for f in (w_dir / "src").iterdir() if f.is_file()]
             for item in directory.iterdir():
-                if item.name in src_files and item.name.endswith(".sol"):
+                if item.name in src_files and item.name.endswith(".sol") and not item.name.endswith(".t.sol") and not "test" in item.name:
                     contract_directories.append(item)
                 elif item.is_dir():
                     explore_contracts(item)

@@ -25,7 +25,6 @@ class FoundryCampaign(BaseCampaign):
         compiler = FoundryCompiler(foundry_command)
         tester = FoundryTester(foundry_command, str(project_directory), compiler)
         source_file_builder = lambda ast, full_path: FoundrySourceFile(ast, full_path)
-
         super().__init__(
             project_directory=project_directory,
             mutators=mutators,
@@ -48,8 +47,9 @@ class FoundryCampaign(BaseCampaign):
         # TODO: This might not be the most reliable way to find the source files
         #       but it works for now. Glob the source directory, then find the set intersection
         #       between the files in src and the files in the out directory
-        src_file_names = set(map(os.path.basename, glob.glob('src/**/*.sol', recursive=True)))
-
+        full_names = glob.glob('src/**/*.sol', recursive=True) 
+        full_names = set(filter(lambda name: not '.t.sol' in name and 'test' not in name, full_names))
+        src_file_names = set(map(os.path.basename, full_names))
         contract_directories = []
         def explore_contracts(directory: Path):
             for item in directory.iterdir():

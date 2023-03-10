@@ -130,6 +130,7 @@ def run(
             click.echo("[-] Vertigo needs at least one network to run analyses on")
             return
 
+        click.echo("[+] If this is taking a while, vertigo-rs is probably installing dependencies in your project")
         try:
             if project_type == "truffle":
                 campaign = TruffleCampaign(
@@ -159,7 +160,8 @@ def run(
                     suggesters=test_suggesters,
                 )
 
-        except:
+        except e:
+            # print(e) uncomment for debugging
             click.echo("[-] Encountered an error while setting up the core campaign")
             if isinstance(network_pool, DynamicNetworkPool):
                 networks = network_pool.claimed_networks.keys()
