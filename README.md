@@ -9,6 +9,7 @@ You do not need to specify that you are in a foundry project, the presence of a 
 
 ```bash
 git clone https://github.com/RareSkills/vertigo-rs
+cd vertigo-rs
 python setup.py develop
 
 cd <your foundry repo>
