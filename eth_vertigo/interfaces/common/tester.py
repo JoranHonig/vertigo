@@ -39,10 +39,19 @@ def normalize_mocha(mocha_json: dict) -> Dict[str, TestResult]:
                 # title: testIncrement(), test_name
                 # fullTitle: testIncrement(), test_name
                 # duration: 0
-                if mocha_json[file_name]["test_results"][test_name]["success"] == True:
-                    tests[test_name] = TestResult(test_name, test_name, 0, True)
-                else:
-                    tests[test_name] = TestResult(test_name, test_name, 0, False)
+                try:
+                    # the way forge JSON outputs is different depending on the version
+                    # so we need to handle both potential output
+                    if mocha_json[file_name]["test_results"][test_name]["success"] == True:
+                        tests[test_name] = TestResult(test_name, test_name, 0, True)
+                    else:
+                        tests[test_name] = TestResult(test_name, test_name, 0, False)
+                except:
+                    if mocha_json[file_name]["test_results"][test_name]["status"] == "Success":
+                        tests[test_name] = TestResult(test_name, test_name, 0, True)
+                    else:
+                        tests[test_name] = TestResult(test_name, test_name, 0, False)
+
         return tests
 
 
