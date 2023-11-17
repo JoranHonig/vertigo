@@ -29,6 +29,11 @@ Changing the source directory. This is usually `src/` by default in foundry, but
 Don't test files in `--src-dir` that match this regex. This is useful if you have mocks or tests in a subdirectory of `src/`
 
 ```
+--scope-file <file>
+```
+Mutate only the files specified in the provided scope file, where each line should list one file path relative to the project root. This option supersedes `--src-dir`. It is useful if you would like to target a select group of files
+
+```
 --sample-ratio <float [0-1]>
 ```
 Don't run every mutation, but run a percentage of them. Useful if you are just checking if everything works end-to-end

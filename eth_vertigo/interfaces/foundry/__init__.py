@@ -14,6 +14,7 @@ class FoundryCampaign(BaseCampaign):
             self,
             src_dir: str,
             exclude_regex: str,
+            scope_file: str,
             foundry_command: List[str],
             project_directory: Path,
             mutators: List[Mutator],
@@ -27,6 +28,7 @@ class FoundryCampaign(BaseCampaign):
 
         self.src_dir = src_dir
         self.exclude_regex = exclude_regex
+        self.scope_file = scope_file
         compiler = FoundryCompiler(foundry_command)
         tester = FoundryTester(foundry_command, str(project_directory), compiler)
         source_file_builder = lambda ast, full_path: FoundrySourceFile(ast, full_path)
@@ -49,12 +51,17 @@ class FoundryCampaign(BaseCampaign):
         if not contracts_dir.exists():
             self.compiler.run_compilation(str(self.project_directory))
 
-        # TODO: This might not be the most reliable way to find the source files
-        #       but it works for now. Glob the source directory, then find the set intersection
-        #       between the files in src and the files in the out directory
-        if str(self.src_dir).endswith('/'):
-            self.src_dir = self.src_dir[:-1]
-        full_names = glob.glob(self.src_dir + '/**/*.sol', recursive=True) 
+        if self.scope_file and not self.scope_file.isspace():
+            with open(self.scope_file, 'r') as file:
+                full_names = file.read().splitlines()
+        else:
+            # TODO: This might not be the most reliable way to find the source files
+            #       but it works for now. Glob the source directory, then find the set intersection
+            #       between the files in src and the files in the out directory
+            if str(self.src_dir).endswith('/'):
+                self.src_dir = self.src_dir[:-1]
+            full_names = glob.glob(self.src_dir + '/**/*.sol', recursive=True) 
+
         exclude_object = re.compile(self.exclude_regex)
 
         full_names = set(filter(lambda name: not exclude_object.search(name), full_names))

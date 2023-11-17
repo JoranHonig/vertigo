@@ -30,6 +30,7 @@ def cli():
 @cli.command(help="Performs a core test campaign")
 @click.option('--src-dir', help="Output core test results to file", nargs=1, type=str, default="src")
 @click.option('--exclude-regex', help="Output core test results to file", nargs=1, type=str, default="(test|Test|mock|Mock|\.t\.sol)")
+@click.option('--scope-file', help="Only mutate files listed in the specified file", nargs=1, type=str)
 @click.option('--output', help="Output core test results to file", nargs=1, type=str)
 @click.option('--network', help="Network names that vertigo can use", multiple=True)
 @click.option('--ganache-path', help="Path to ganache binary", type=str, default="ganache-cli")
@@ -46,6 +47,7 @@ def cli():
 def run(
         src_dir,
         exclude_regex,
+        scope_file,
         output,
         network,
         ganache_path,
@@ -158,6 +160,7 @@ def run(
                 campaign = FoundryCampaign(
                     src_dir=src_dir,
                     exclude_regex=exclude_regex,
+                    scope_file=scope_file,
                     foundry_command=["forge"],
                     project_directory=project_path,
                     mutators=mutators,
