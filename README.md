@@ -1,85 +1,55 @@
-# vertigo
-[![Build Status](https://travis-ci.org/JoranHonig/vertigo.svg?branch=master)](https://travis-ci.org/JoranHonig/vertigo)
-[![Gitter](https://badges.gitter.im/eth-vertigo/community.svg)](https://gitter.im/eth-vertigo/community?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge)
+# vertigo-rs
 
-Vertigo is a mutation testing framework designed to work specifically for smart contracts.
-This mutation testing framework implements a range of mutation operators that are either selected from previous works or tailored to solidity.
+## Introduction
+This is an actively maintained fork of Joran Honig's [vertigo](https://github.com/JoranHonig/vertigo) with support for foundry added.
 
-### Quick Start Guide
+This tool will mutate files in `src/` and run `forge test` to see if the mutant survives. Files that end with `.t.sol` or have `test` in their name (including the path) are ignored. Files in lib (or any directory that isn't src/) will not be mutated.
 
-To install vertigo, execute the following command:
-```bash
-pip3 install --user eth-vertigo
-```
-
-You can now run vertigo on a truffle project with the following command (assuming you have a `development` network configured in your`truffle-config.js`):
+You do not need to specify that you are in a foundry project, the presence of a `foundry.toml` file will signify to this tool that you are in a foundry repo. If you have configuration files for truffle or hardhat in your project, this tool will get confused. You can temporarily change their names.
 
 ```bash
-vertigo run --network development
-```
-Depending on your environment it might be required to specify the location of the truffle executable:
-```bash
-vertigo run --network development --truffle-location <node_dir>/bin/truffle 
-```
+git clone https://github.com/RareSkills/vertigo-rs
+cd vertigo-rs
+python setup.py develop
 
-Or, if you're using Hardhat, just use dynamic networks:
-```bash
-vertigo run --hardhat-parallel 8
+cd <your foundry repo>
+
+python <path-to-this-project>/vertigo-rs/vertigo.py run
 ```
 
-There are a few additional parameters available that allow you to tweak the execution of vertigo:
-```bash
-$ vertigo run --help                                                                                                                                                                  
-Usage: vertigo run [OPTIONS]
-
-  Performs a core test campaign
-
-Options:
-  --output TEXT                   Output core test results to file
-  --network TEXT                  Network names that vertigo can use
-  --ganache-path TEXT             Path to ganache binary
-  --ganache-network <TEXT INTEGER>...
-                                  Dynamic networks that vertigo can use eg.
-                                  (develop, 8485)
-
-  --ganache-network-options TEXT  Options to pass to dynamic ganache networks
-  --hardhat-parallel INTEGER      Amount of networks that hardhat should be
-                                  using in parallel
-
-  --rules TEXT                    Universal Mutator style rules to use in
-                                  mutation testing
-
-  --truffle-location TEXT         Location of truffle cli
-  --sample-ratio FLOAT            If this option is set. Vertigo will apply
-                                  the sample filter with the given ratio
-
-  --exclude TEXT                  Vertigo won't mutate files in these
-                                  directories
-
-  --incremental TEXT              File where incremental mutation state is
-                                  stored
-
-  --help                          Show this message and exit.
-                                                                                                                                     
+## cli arguments
 ```
-
-### Known Issues
-
-**Ganache** is generally used only for a single run of the entire test suite. 
-For the general use case, it does not matter if Ganache creates a few thousand files.
-Unfortunately, once you start executing the entire test suite hundreds of times, you can end up with millions of files, and your machine could run out of free inode's.
-You can check whether this happens to you by running:
+--src-dir <contracts-directory>
 ```
-df -i
+Changing the source directory. This is usually `src/` by default in foundry, but if you have a different name like `contracts` you can specify it with --src-dir. Default is `src/`
+
 ```
+--exclude-regex <regex>
+```
+Don't test files in `--src-dir` that match this regex. This is useful if you have mocks or tests in a subdirectory of `src/`
 
-This issue ([#1](https://github.com/JoranHonig/vertigo/issues/1)) is known, and we're working on a fix.
- 
-In the meanwhile. If your test suite is large enough to munch all your inodes, then there are two options:
- - You can use the command line option `--sample-ratio` to select a random subsample of the mutations (reducing the number of times that the test suite is run)
- - You can create a partition that has a sufficient amount of inodes available
+```
+--scope-file <file>
+```
+Mutate only the files specified in the provided scope file, where each line should list one file path relative to the project root. This option supersedes `--src-dir`. It is useful if you would like to target a select group of files
 
-### Publications and Articles
+```
+--sample-ratio <float [0-1]>
+```
+Don't run every mutation, but run a percentage of them. Useful if you are just checking if everything works end-to-end
+
+```
+--output <file>
+```
+Save output to a file instead of stdout. Some terminals don't show the output, so use this option if you don't see an output. Recommended to use generally. Defaults to stdout.
+
+Please see the original [readme](https://github.com/JoranHonig/vertigo/blob/master/README.md) for the other options, or use the `--help` option to see the rest.
+
+
+## Maintainers
+Jeffrey Scholz [RareSkills](https://www.rareskills.io)
+
+## Publications and Articles
 [Practical Mutation Testing for Smart Contracts](https://link.springer.com/chapter/10.1007/978-3-030-31500-9_19) - Joran J. Honig, Maarten H. Everts, Marieke Huisman
 
 [Introduction into Mutation Testing](https://medium.com/swlh/introduction-into-mutation-testing-d6512dc702b0?source=friends_link&sk=2878e0c08b6301a125198a264e43edb4) - Joran Honig

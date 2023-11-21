@@ -52,7 +52,7 @@ def _get_op_info(node: dict):
     return original_operator, op_src
 
 
-class HardhatSourceFile(SourceFile):
+class FoundrySourceFile(SourceFile):
     def __init__(self, ast: Dict, file: Path):
         self.ast = ast
         super().__init__(file)

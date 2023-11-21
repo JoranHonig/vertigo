@@ -87,7 +87,11 @@ class Mutation:
         """ Prints information that can be used to triage a core """
         template = environment.get_template("mutation_template.jinja2")
         source_content = self.source.file.read_text('utf-8')
-        line_nr, og_line = self._get_mutated_line(self.location[0], source_content)
+        try:
+            line_nr, og_line = self._get_mutated_line(self.location[0], source_content)
+        except:
+            # TODO: Some kind of indicator the parsing broke
+            return ''
 
         mutated = source_content[:self.location[0]] \
                   + self.value + \

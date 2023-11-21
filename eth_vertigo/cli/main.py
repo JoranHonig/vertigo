@@ -5,6 +5,7 @@ from eth_vertigo.core import MutationResult
 from eth_vertigo.core.network import DynamicNetworkPool, StaticNetworkPool, Ganache
 from eth_vertigo.interfaces.truffle import TruffleCampaign
 from eth_vertigo.interfaces.hardhat import HardhatCampaign
+from eth_vertigo.interfaces.foundry import FoundryCampaign
 from eth_vertigo.core.filters.sample_filter import SampleFilter
 from eth_vertigo.core.filters.exclude_filter import ExcludeFilter
 from eth_vertigo.test_runner.exceptions import TestRunException
@@ -14,6 +15,12 @@ from eth_vertigo.incremental import IncrementalRecorder, IncrementalMutationStor
 
 from tqdm import tqdm
 
+try:
+    import pretty_traceback
+    pretty_traceback.install()
+except ImportError:
+    pass    # no need to fail because of missing dev dependency
+
 
 @click.group(help="Mutation testing framework for smart contracts")
 def cli():
@@ -21,6 +28,9 @@ def cli():
 
 
 @cli.command(help="Performs a core test campaign")
+@click.option('--src-dir', help="Output core test results to file", nargs=1, type=str, default="src")
+@click.option('--exclude-regex', help="Output core test results to file", nargs=1, type=str, default="(test|Test|mock|Mock|\.t\.sol)")
+@click.option('--scope-file', help="Only mutate files listed in the specified file", nargs=1, type=str)
 @click.option('--output', help="Output core test results to file", nargs=1, type=str)
 @click.option('--network', help="Network names that vertigo can use", multiple=True)
 @click.option('--ganache-path', help="Path to ganache binary", type=str, default="ganache-cli")
@@ -35,6 +45,9 @@ def cli():
 @click.option('--incremental', help="File where incremental mutation state is stored",
               type=str)
 def run(
+        src_dir,
+        exclude_regex,
+        scope_file,
         output,
         network,
         ganache_path,
@@ -95,6 +108,13 @@ def run(
             mutators.append(um)
 
         network_pool = None
+        #TODO: This is in the wrong place
+        if project_type == "foundry":
+            click.echo("[+] Foundry project detected")
+
+        if project_type == "foundry":
+            network_pool = StaticNetworkPool(["_not_used_anywhere_"])
+
         if hardhat_parallel:
             if project_type != "hardhat":
                 click.echo("[+] Not running analysis on hardhat project, ignoring hardhat parallel option")
@@ -116,6 +136,7 @@ def run(
             click.echo("[-] Vertigo needs at least one network to run analyses on")
             return
 
+        click.echo("[+] If this is taking a while, vertigo-rs is probably installing dependencies in your project")
         try:
             if project_type == "truffle":
                 campaign = TruffleCampaign(
@@ -135,7 +156,21 @@ def run(
                     filters=filters,
                     suggesters=test_suggesters,
                 )
-        except:
+            if project_type == "foundry":
+                campaign = FoundryCampaign(
+                    src_dir=src_dir,
+                    exclude_regex=exclude_regex,
+                    scope_file=scope_file,
+                    foundry_command=["forge"],
+                    project_directory=project_path,
+                    mutators=mutators,
+                    network_pool=network_pool,
+                    filters=filters,
+                    suggesters=test_suggesters,
+                )
+
+        except e:
+            # print(e) uncomment for debugging
             click.echo("[-] Encountered an error while setting up the core campaign")
             if isinstance(network_pool, DynamicNetworkPool):
                 networks = network_pool.claimed_networks.keys()
@@ -155,7 +190,7 @@ def run(
         campaign.setup()
         click.echo("[*] Checking validity of project")
         if not campaign.valid():
-            click.echo("[-] We couldn't get valid results by running the truffle tests.\n Aborting")
+            click.echo("[-] We couldn't get valid results by running the tests.\n Aborting")
             return
 
         click.echo("[+] The project is valid")
@@ -205,8 +240,11 @@ def _directory_type(working_directory: str):
     wd = Path(working_directory)
     has_truffle_config = (wd / "truffle.js").exists() or (wd / "truffle-config.js").exists()
     has_hardhat_config = (wd / "hardhat.config.js").exists()
-    if has_truffle_config and not has_hardhat_config:
+    has_foundry_config = (wd / "foundry.toml").exists()
+    if has_truffle_config and not has_hardhat_config and not has_foundry_config:
         return "truffle"
-    if has_hardhat_config and not has_truffle_config:
+    if has_foundry_config and not has_truffle_config and not has_hardhat_config:
+        return "foundry"
+    if has_hardhat_config and not has_foundry_config and not has_truffle_config:
         return "hardhat"
     return None

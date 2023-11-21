@@ -19,14 +19,40 @@ from eth_vertigo.test_runner.exceptions import EquivalentMutant
 
 from typing import List, Dict, Union
 
-
 def normalize_mocha(mocha_json: dict) -> Dict[str, TestResult]:
+ 
+    file_names = list(mocha_json.keys())
     tests = {}
-    for failure in mocha_json["failures"]:
-        tests[failure["fullTitle"]] = TestResult(failure["title"], failure["fullTitle"], failure["duration"], False)
-    for success in mocha_json["passes"]:
-        tests[success["fullTitle"]] = TestResult(success["title"], success["fullTitle"], success["duration"], True)
-    return tests
+    # it really is mocha
+    if "tests" in mocha_json:
+        for failure in mocha_json["failures"]:
+            tests[failure["fullTitle"]] = TestResult(failure["title"], failure["fullTitle"], failure["duration"], False)
+        for success in mocha_json["passes"]:
+            tests[success["fullTitle"]] = TestResult(success["title"], success["fullTitle"], success["duration"], True)
+        return tests
+
+    # it is foundry
+    else:
+        for file_name in file_names:
+            for test_name in mocha_json[file_name]["test_results"].keys():
+                # foundry does not provide this information
+                # title: testIncrement(), test_name
+                # fullTitle: testIncrement(), test_name
+                # duration: 0
+                try:
+                    # the way forge JSON outputs is different depending on the version
+                    # so we need to handle both potential output
+                    if mocha_json[file_name]["test_results"][test_name]["success"] == True:
+                        tests[test_name] = TestResult(test_name, test_name, 0, True)
+                    else:
+                        tests[test_name] = TestResult(test_name, test_name, 0, False)
+                except:
+                    if mocha_json[file_name]["test_results"][test_name]["status"] == "Success":
+                        tests[test_name] = TestResult(test_name, test_name, 0, True)
+                    else:
+                        tests[test_name] = TestResult(test_name, test_name, 0, False)
+
+        return tests
 
 
 def make_temp_directory(original_dir: str):
@@ -109,7 +135,8 @@ class MochaStdoutTester(Tester):
             stdin.seek(0)
             proc = Popen(command, stdin=stdin, stdout=stdout, stderr=stdout, cwd=working_directory)
             try:
-                proc.wait(timeout=timeout)
+                #TODO: timeout defaults to zero for some reason
+                proc.wait(timeout=1000000)
             except TimeoutExpired:
                 proc.kill()
                 raise TimedOut
