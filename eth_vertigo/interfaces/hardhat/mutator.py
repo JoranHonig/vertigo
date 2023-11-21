@@ -91,7 +91,7 @@ class HardhatSourceFile(SourceFile):
                 continue
             if "function" not in function_typedef:
                 continue
-            if function_identifier["typeDescriptions"]["typeIdentifier"].startswith("t_function_event"):
+            if function_identifier["typeDescriptions"]["typeIdentifier"].startswith(("t_function_event", "t_function_error_pure")):
                 continue
 
             try:
